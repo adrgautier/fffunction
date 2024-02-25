@@ -4,22 +4,44 @@
  * the file needs to compile without error.
  */
 import { expectType, TypeEqual } from 'ts-expect';
-import { AcceptedInputsArray, ConstrainInputsOverlapping, InferExpectedOutput } from '../src/index';
+import { InferDeclarationConstraint, InferExpectedOutput, InferAcceptedInputs, InferImplementationArgument, InferFunctionOverload } from '../src/types';
+import type { FFFArgument } from '../src/classes';
 
 /**
- * AcceptedInputsArray
+ * InferImplementationArgument
  */
 expectType<
   TypeEqual<
-    AcceptedInputsArray<[["number", number], ["string", string]]>,
-    ["number", "string"]
+    InferImplementationArgument<[["number", number], ["string", string]]>,
+    FFFArgument<"number", number> | FFFArgument<"string", string>
+>>(true);
+
+
+/**
+ * InferFunctionOverload
+ */
+expectType<
+  TypeEqual<
+  InferFunctionOverload<[["number", number], ["string", string]]>,
+    ((i: "number") => number) & ((i: "string") => string)
+  >
+>(true);
+
+
+/**
+ * InferAcceptedInputs
+ */
+expectType<
+  TypeEqual<
+  InferAcceptedInputs<[["number", number], ["string", string]]>,
+    "number" | "string"
   >
 >(true);
 
 expectType<
   TypeEqual<
-    AcceptedInputsArray<[["number", number], ["string", string]]>,
-    ["string", "number"]
+  InferAcceptedInputs<[["number", number], ["string", string]]>,
+    "number" | "symbol"
   >
 >(false);
 
@@ -51,7 +73,6 @@ expectType<
   >
 >(true);
 
-/******/
 expectType<
   TypeEqual<
     InferExpectedOutput<
@@ -83,11 +104,11 @@ expectType<
 >(true);
 
 /**
- * ConstrainInputsOverlapping
+ * InferDeclarationConstraint
  */
 expectType<
   TypeEqual<
-    ConstrainInputsOverlapping<
+  InferDeclarationConstraint<
       [["number", number], ["string", string]],
       "number"
     >,
@@ -97,14 +118,14 @@ expectType<
 
 expectType<
   TypeEqual<
-    ConstrainInputsOverlapping<[["number", number], ["string", string]], "nmb">,
+  InferDeclarationConstraint<[["number", number], ["string", string]], "nmb">,
     unknown
   >
 >(true);
 
 expectType<
   TypeEqual<
-    ConstrainInputsOverlapping<
+  InferDeclarationConstraint<
       [[{ test: "test"; test2: "test2" }, number]],
       { test: "test" }
     >,
@@ -114,7 +135,7 @@ expectType<
 
 expectType<
   TypeEqual<
-    ConstrainInputsOverlapping<
+  InferDeclarationConstraint<
       [[{ test: "test" }, number]],
       { test: "test"; test2: "test2" }
     >,

@@ -1,4 +1,5 @@
-import fffunction from '../src/index';
+import { P, match } from 'ts-pattern';
+import { fffunction } from '../src/index';
 
 describe('fffunction', () => {
   it('should return the correct value according to the input', () => {
@@ -23,15 +24,18 @@ describe('fffunction', () => {
     const format = fffunction
     .f<string, string>()
     .f<number, number>()
-    .f(({ input, output}) => {
-      if(typeof input === 'string') {
-        return output(input);
-      }
-      return output(input);
-    });
+    .f<symbol, symbol>()
+    .f<true>((a) => (
+      match(a)
+        .with({input: P.string}, ({ output }) => output("one"))
+        .with({input: P.number}, ({ output }) => output(1))
+        .with({input: P.symbol}, ({ output }) => output(Symbol()))
+        .exhaustive()
+    ));
 
-    // Then
+    // Then  
     expect(typeof format(1000)).toBe('number');
     expect(typeof format('1000')).toBe('string');
+    expect(typeof format(Symbol())).toBe('symbol');
   });
 });

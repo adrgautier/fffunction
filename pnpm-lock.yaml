@@ -23,6 +23,9 @@ devDependencies:
   ts-jest:
     specifier: 29.1.2
     version: 29.1.2(@babel/core@7.23.2)(jest@29.7.0)(typescript@5.3.3)
+  ts-pattern:
+    specifier: ^5.0.6
+    version: 5.0.6
   typescript:
     specifier: 5.3.3
     version: 5.3.3
@@ -2348,6 +2351,10 @@ packages:
       semver: 7.5.4
       typescript: 5.3.3
       yargs-parser: 21.1.1
+    dev: true
+
+  /ts-pattern@5.0.6:
+    resolution: {integrity: sha512-Y+jOjihlFriWzcBjncPCf2/am+Hgz7LtsWs77pWg5vQQKLQj07oNrJryo/wK2G0ndNaoVn2ownFMeoeAuReu3Q==}
     dev: true
 
   /type-detect@4.0.8:
