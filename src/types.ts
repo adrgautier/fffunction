@@ -1,5 +1,7 @@
 import type { FFFArgument, FFFOutput } from "./classes";
 
+type Literal = string | number | boolean;
+
 export type FFFTuple<
   TInput extends unknown = unknown,
   TOutput extends unknown = unknown
@@ -27,9 +29,19 @@ export type InferExpectedOutput<
  * A specific order must be respected in order for InferExpectedOutput to work.
  */
 export type InferDeclarationConstraint<
-  TTuples extends FFFTuple[],
-  TInput
-> = TInput extends InferAcceptedInputs<TTuples> ? never : unknown;
+  TTuples extends unknown[],
+  TInput extends unknown,
+  TInputCopy = TInput // somehow boolean becomes false, use a copy to bypass this issue
+> = (TInput extends InferAcceptedInputs<TTuples> ? 
+      never :
+    (TInput extends Literal ? InferLiteralDeclarationConstraint<TTuples, TInputCopy>: unknown));
+
+
+export type InferLiteralDeclarationConstraint<TTuples extends unknown[], TNewInput> = 
+    TTuples extends [[infer TDeclaredInput, unknown], ...infer TTuplesRest] ? 
+      (Exclude<TDeclaredInput, TNewInput > extends never ? never: InferLiteralDeclarationConstraint<TTuplesRest, TNewInput>): unknown;
+
+
 
 export type InferConditionalReturnFunction<TTuples extends FFFTuple[]> = 
 <TInput extends InferAcceptedInputs<TTuples>>(input: TInput) => InferExpectedOutput<TTuples, TInput>;

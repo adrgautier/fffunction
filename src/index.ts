@@ -8,25 +8,24 @@ class FFFunction <TTuples extends FFFTuple[] = []> {
   f<
     TInput,
     TOutput extends InferDeclarationConstraint<TTuples, TInput>
-  >(): FFFunction<
-      TTuples extends [] ? [[TInput, TOutput]] : [...TTuples, [TInput, TOutput]]>;
+  >(): FFFunction<[...TTuples, [TInput, TOutput]]>;
 
   /**
    * Implement function.
    * @param implementation 
    */
-  f<T extends false>(
+  f<TAdHoc extends boolean = false>(
     implementation: InferImplementation<TTuples>
-  ): InferConditionalReturnFunction<TTuples>;
+  ): TAdHoc extends true ? InferFunctionOverload<TTuples>: InferConditionalReturnFunction<TTuples>;
 
   /**
    * Implement function.
    * @param implementation 
-   */
+
    f<T extends true>(
     implementation: InferImplementation<TTuples>
   ): InferFunctionOverload<TTuples>;
-
+*/
    f(
     implementation?: InferImplementation<any>
   ) {

@@ -4,7 +4,7 @@
  * the file needs to compile without error.
  */
 import { expectType, TypeEqual } from 'ts-expect';
-import { InferDeclarationConstraint, InferExpectedOutput, InferAcceptedInputs, InferImplementationArgument, InferFunctionOverload } from '../src/types';
+import { InferDeclarationConstraint, InferExpectedOutput, InferAcceptedInputs, InferImplementationArgument, InferFunctionOverload, InferLiteralDeclarationConstraint } from '../src/types';
 import type { FFFArgument } from '../src/classes';
 
 /**
@@ -109,7 +109,7 @@ expectType<
 expectType<
   TypeEqual<
   InferDeclarationConstraint<
-      [["number", number], ["string", string]],
+      [["number", any], ["string", string]],
       "number"
     >,
     never
@@ -118,7 +118,7 @@ expectType<
 
 expectType<
   TypeEqual<
-  InferDeclarationConstraint<[["number", number], ["string", string]], "nmb">,
+  InferDeclarationConstraint<[["number", any], ["string", any]], "nmb">,
     unknown
   >
 >(true);
@@ -126,7 +126,7 @@ expectType<
 expectType<
   TypeEqual<
   InferDeclarationConstraint<
-      [[{ test: "test"; test2: "test2" }, number]],
+      [[{ test: "test"; test2: "test2" }, any]],
       { test: "test" }
     >,
     unknown
@@ -136,9 +136,95 @@ expectType<
 expectType<
   TypeEqual<
   InferDeclarationConstraint<
-      [[{ test: "test" }, number]],
+      [[{ test: "test" }, any]],
       { test: "test"; test2: "test2" }
     >,
     never
   >
 >(true);
+
+expectType<
+  TypeEqual<
+  InferDeclarationConstraint<
+      [[string, any]],
+      `https://${string}`
+    >,
+    never
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+  InferDeclarationConstraint<
+      [[`https://${string}`, any]],
+      string
+    >,
+    never
+  >
+>(true);
+
+
+expectType<
+  TypeEqual<
+  InferDeclarationConstraint<
+      [[boolean, any]],
+      true
+    >,
+    never
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+  InferDeclarationConstraint<
+      [[boolean, any]],
+      false
+    >,
+    never
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+  InferDeclarationConstraint<
+      [[true, any]],
+      boolean
+    >,
+    never
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+  InferDeclarationConstraint<
+      [[false, any]],
+      boolean
+    >,
+    never
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+  InferDeclarationConstraint<
+      [[false, any]],
+      true
+    >,
+    unknown
+  >
+>(true);
+
+
+/**
+ * InferLiteralDeclarationConstraint
+ */
+expectType<
+  TypeEqual<
+  InferLiteralDeclarationConstraint<
+      [[false, any]],
+      boolean
+    >,
+    never
+  >
+>(true);
+
