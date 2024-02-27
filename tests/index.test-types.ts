@@ -4,7 +4,15 @@
  * the file needs to compile without error.
  */
 import { expectType, TypeEqual } from 'ts-expect';
-import { InferDeclarationConstraint, InferExpectedOutput, InferAcceptedInputs, InferImplementationArgument, InferFunctionOverload, InferLiteralDeclarationConstraint } from '../src/types';
+import { fffunction } from '../src';
+import {
+  InferDeclarationConstraint,
+  InferExpectedOutput,
+  InferAcceptedInputs,
+  InferImplementationArgument,
+  InferFunctionOverload,
+  InferLiteralDeclarationConstraint,
+} from '../src/types';
 import type { FFFArgument } from '../src/classes';
 
 /**
@@ -12,36 +20,43 @@ import type { FFFArgument } from '../src/classes';
  */
 expectType<
   TypeEqual<
-    InferImplementationArgument<[["number", number], ["string", string]]>,
-    FFFArgument<"number", number> | FFFArgument<"string", string>
->>(true);
+    InferImplementationArgument<[['number', number], ['string', string]]>,
+    FFFArgument<'number', number> | FFFArgument<'string', string>
+  >
+>(true);
 
+
+expectType<
+  TypeEqual<
+    InferImplementationArgument<[[{ id: number, name: string }, 'profile'], [{ id: number }, 'item']]>,
+    FFFArgument<{ id: number, name: string }, 'profile'> | FFFArgument<{ id: number }, 'item'>
+  >
+>(true);
 
 /**
  * InferFunctionOverload
  */
 expectType<
   TypeEqual<
-  InferFunctionOverload<[["number", number], ["string", string]]>,
-    ((i: "number") => number) & ((i: "string") => string)
+    InferFunctionOverload<[['number', number], ['string', string]]>,
+    ((i: 'number') => number) & ((i: 'string') => string)
   >
 >(true);
-
 
 /**
  * InferAcceptedInputs
  */
 expectType<
   TypeEqual<
-  InferAcceptedInputs<[["number", number], ["string", string]]>,
-    "number" | "string"
+    InferAcceptedInputs<[['number', number], ['string', string]]>,
+    'number' | 'string'
   >
 >(true);
 
 expectType<
   TypeEqual<
-  InferAcceptedInputs<[["number", number], ["string", string]]>,
-    "number" | "symbol"
+    InferAcceptedInputs<[['number', number], ['string', string]]>,
+    'number' | 'symbol'
   >
 >(false);
 
@@ -51,14 +66,14 @@ expectType<
 
 expectType<
   TypeEqual<
-    InferExpectedOutput<[["number", number], ["string", string]], "number">,
+    InferExpectedOutput<[['number', number], ['string', string]], 'number'>,
     number
   >
 >(true);
 
 expectType<
   TypeEqual<
-    InferExpectedOutput<[["number", number], ["string", string]], "string">,
+    InferExpectedOutput<[['number', number], ['string', string]], 'string'>,
     string
   >
 >(true);
@@ -66,8 +81,8 @@ expectType<
 expectType<
   TypeEqual<
     InferExpectedOutput<
-      [[{ test: "test"; test2: "test2" }, string], [{ test: "test" }, number]],
-      { test: "test" }
+      [[{ test: 'test'; test2: 'test2' }, string], [{ test: 'test' }, number]],
+      { test: 'test' }
     >,
     number
   >
@@ -76,8 +91,8 @@ expectType<
 expectType<
   TypeEqual<
     InferExpectedOutput<
-      [[{ type: "string"; value: number }, string], [{ type: "number"; value: number }, number]],
-      { type: "string"; value: number }
+      [[{ test: 'test'; test2: 'test2' }, string], [{ test: 'test' }, number]],
+      { test: 'test'; test2: 'test2' }
     >,
     string
   >
@@ -86,8 +101,11 @@ expectType<
 expectType<
   TypeEqual<
     InferExpectedOutput<
-      [[string, string], [number, number]],
-      string
+      [
+        [{ type: 'string'; value: number }, string],
+        [{ type: 'number'; value: number }, number],
+      ],
+      { type: 'string'; value: number }
     >,
     string
   >
@@ -95,10 +113,14 @@ expectType<
 
 expectType<
   TypeEqual<
-    InferExpectedOutput<
-      [[string, string], [number, number]],
-      number
-    >,
+    InferExpectedOutput<[[string, string], [number, number]], string>,
+    string
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+    InferExpectedOutput<[[string, string], [number, number]], number>,
     number
   >
 >(true);
@@ -108,26 +130,23 @@ expectType<
  */
 expectType<
   TypeEqual<
-  InferDeclarationConstraint<
-      [["number", any], ["string", string]],
-      "number"
-    >,
+    InferDeclarationConstraint<[['number', any], ['string', string]], 'number'>,
     never
   >
 >(true);
 
 expectType<
   TypeEqual<
-  InferDeclarationConstraint<[["number", any], ["string", any]], "nmb">,
+    InferDeclarationConstraint<[['number', any], ['string', any]], 'nmb'>,
     unknown
   >
 >(true);
 
 expectType<
   TypeEqual<
-  InferDeclarationConstraint<
-      [[{ test: "test"; test2: "test2" }, any]],
-      { test: "test" }
+    InferDeclarationConstraint<
+      [[{ test: 'test'; test2: 'test2' }, any]],
+      { test: 'test' }
     >,
     unknown
   >
@@ -135,9 +154,9 @@ expectType<
 
 expectType<
   TypeEqual<
-  InferDeclarationConstraint<
-      [[{ test: "test" }, any]],
-      { test: "test"; test2: "test2" }
+    InferDeclarationConstraint<
+      [[{ test: 'test' }, any]],
+      { test: 'test'; test2: 'test2' }
     >,
     never
   >
@@ -145,86 +164,74 @@ expectType<
 
 expectType<
   TypeEqual<
-  InferDeclarationConstraint<
-      [[string, any]],
-      `https://${string}`
-    >,
+    InferDeclarationConstraint<[[string, any]], `https://${string}`>,
     never
   >
 >(true);
 
 expectType<
   TypeEqual<
-  InferDeclarationConstraint<
-      [[`https://${string}`, any]],
-      string
-    >,
-    never
-  >
->(true);
-
-
-expectType<
-  TypeEqual<
-  InferDeclarationConstraint<
-      [[boolean, any]],
-      true
-    >,
+    InferDeclarationConstraint<[[`https://${string}`, any]], string>,
     never
   >
 >(true);
 
 expectType<
-  TypeEqual<
-  InferDeclarationConstraint<
-      [[boolean, any]],
-      false
-    >,
-    never
-  >
+  TypeEqual<InferDeclarationConstraint<[[boolean, any]], true>, never>
 >(true);
 
 expectType<
-  TypeEqual<
-  InferDeclarationConstraint<
-      [[true, any]],
-      boolean
-    >,
-    never
-  >
+  TypeEqual<InferDeclarationConstraint<[[boolean, any]], false>, never>
 >(true);
 
 expectType<
-  TypeEqual<
-  InferDeclarationConstraint<
-      [[false, any]],
-      boolean
-    >,
-    never
-  >
+  TypeEqual<InferDeclarationConstraint<[[true, any]], boolean>, never>
 >(true);
 
 expectType<
-  TypeEqual<
-  InferDeclarationConstraint<
-      [[false, any]],
-      true
-    >,
-    unknown
-  >
+  TypeEqual<InferDeclarationConstraint<[[false, any]], boolean>, never>
 >(true);
 
+expectType<
+  TypeEqual<InferDeclarationConstraint<[[false, any]], true>, unknown>
+>(true);
 
 /**
  * InferLiteralDeclarationConstraint
  */
 expectType<
-  TypeEqual<
-  InferLiteralDeclarationConstraint<
-      [[false, any]],
-      boolean
-    >,
-    never
-  >
+  TypeEqual<InferLiteralDeclarationConstraint<[[false, any]], boolean>, never>
 >(true);
 
+/***
+ *
+ */
+
+fffunction
+  .f<string, { test2: 'test2' }>()
+  .f<number, { test: 'test' }>()
+  .f(function implementation ({ input, output }) {
+    return output({ test: 'test', test2: 'test2' });
+  });
+
+fffunction
+  .f<string, string>()
+  // @ts-expect-error
+  .f<string, number>();
+
+
+fffunction
+  .f<`https://${string}`, URL>()
+  // @ts-expect-error
+  .f<string, string>() 
+
+
+fffunction
+  .f<'string', string>()
+  .f<'void', void>()
+  .f(({input, output}) => {
+    if(input === 'string') {
+      return output('test')
+    }
+    return output();
+  })

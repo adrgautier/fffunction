@@ -1,4 +1,4 @@
-import { OUTPUT_SYMBOL } from "./constant";
+import { OUTPUT_SYMBOL } from './constant';
 
 export class FFFOutput<TOutput> {
   private [OUTPUT_SYMBOL]: TOutput;
@@ -12,10 +12,10 @@ export class FFFOutput<TOutput> {
 }
 
 export class FFFArgument<TInput extends unknown, TOutput extends unknown> {
-    public input: TInput;
-    public output = (output: TOutput) => new FFFOutput(output)
+  public input: TInput;
+  public output = (output: TOutput) => new FFFOutput(output);
 
-    constructor(input: TInput) {
-      this.input = input;
-    }
+  constructor(input: TInput) {
+    this.input = input;
+  }
 }
