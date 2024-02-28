@@ -23,4 +23,7 @@ jobs:
           version: 8
       - run: pnpm install
       - run: pnpm test
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: adrgautier/fffunction
