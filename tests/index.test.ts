@@ -2,7 +2,7 @@ import { P, match } from 'ts-pattern';
 import { fffunction } from '../src/index';
 
 describe('fffunction', () => {
-  it('should return the correct value according to the input', () => {
+  it('should return the correct value according to the input (literal)', () => {
     // Given
     const random = fffunction
       .f<'number', number>()
@@ -19,13 +19,13 @@ describe('fffunction', () => {
     expect(typeof random('number')).toBe('number');
     expect(typeof random('string')).toBe('string');
   });
-  it('should return the correct value according to the input (2)', () => {
+  it('should return the correct value according to the input (literal 2)', () => {
     // Given
     const format = fffunction
       .f<string, string>()
       .f<number, number>()
       .f<symbol, symbol>()
-      .f<true>(a =>
+      .f(a =>
         match(a)
           .with({ input: P.string }, ({ output }) => output('one'))
           .with({ input: P.number }, ({ output }) => output(1))
@@ -39,33 +39,35 @@ describe('fffunction', () => {
     expect(typeof format(Symbol())).toBe('symbol');
   });
 
-  it('should return the correct value according to the input (3)', () => {
+  it('should return the correct value according to the input (object)', () => {
     // Given
     const discriminate = fffunction
-      .f<{ id: number, name: string }, 'profile'>()
+      .f<{ id: number; name: string }, 'profile'>()
       .f<{ id: number }, 'item'>()
-      .f((a) => 
+      .f(a =>
         match(a)
-          .with({ input: { name: P.string } }, ({ output }) => output('profile'))
+          .with({ input: { name: P.string } }, ({ output }) =>
+            output('profile')
+          )
           .otherwise(({ output }) => output('item'))
       );
 
     // Then
-    expect(discriminate({id: 1})).toBe('item');
-    expect(discriminate({id: 2, name: 'test'})).toBe('profile');
+    expect(discriminate({ id: 1 })).toBe('item');
+    expect(discriminate({ id: 2, name: 'test' })).toBe('profile');
   });
 
   it('should work with void return', () => {
     const poly = fffunction
-    .f<'string', string>()
-    .f<'void', void>()
-    .f(({input, output}) => {
-      if(input === 'string') {
-        return output('test')
-      }
-      return output();
-    });
+      .f<'string', string>()
+      .f<'void', void>()
+      .f(({ input, output }) => {
+        if (input === 'string') {
+          return output('test');
+        }
+        return output();
+      });
     expect(typeof poly('void')).toBe('undefined');
     expect(typeof poly('string')).toBe('string');
-  })
+  });
 });

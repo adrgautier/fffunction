@@ -40,7 +40,7 @@ console.log(random("string")); // 425dd1a0-cfc0-4eac-a2d7-486860d9bdd4
 
 The returned type **is guaranted** by the `output` function.
 
-# API 
+# How to use 
 
 ## Signatures declaration
 
@@ -73,7 +73,7 @@ fffunction
    .f<{ id: number }, Item>()
 ```
 
-*fffunction* prevents declaring signatures in the **wrong order*:
+*fffunction* prevents declaring signatures in the **wrong order**:
 
 ```ts
 fffunction
@@ -157,6 +157,7 @@ fffunction
       if('name' in input) {
          return output('profile');
                        ^^^^^^^^^
+         // Type 'string' does not satisfy the constraint 'never'. ts(2344)
       }
       return output('item');
    });
@@ -190,14 +191,12 @@ This mode allow to declare the polymorphic function using [function overloading]
 
 This can make the resulting function easier to understand with each signature individially identifiable.
 
->**By default**
->   
->![conditional suggestion](./images/conditional_declaration.png)
+
+|Default|Ad hoc|
+|-------|------|
+|![conditional suggestion](./images/conditional_declaration.png)|![overload suggestion](./images/overload_declaration.png)|
 
 
->**With ad hoc**
->   
->![conditional suggestion](./images/overload_declaration.png)
 
 #### Drawback
 
@@ -220,7 +219,7 @@ With the above example, `mode` must be either `"string"` or `"number"`. The unce
              ^^^^^^
 ```
 
-That means input of two signature are conflicting. See the **input overlapping** section above.
+That means input of two signatures are conflicting. See the **input overlapping** section above.
 
 
 ## Function implementation
@@ -235,12 +234,12 @@ return output(value);
 The type `input` type has not been narrowed down enough or properly.
 
 
-## `TS2322: Type 'A' is not assignable to type 'FFFOutput<A | B>'`
+### `TS2322: Type 'A' is not assignable to type 'FFFOutput<A | B>'`
 
 ```ts
 return value;
        ^^^^^ 
 ```
 
-You are trying to return a value without validating with the `output` function
+You are trying to return a value without the `output` function.
 
