@@ -1,3 +1,9 @@
+.github
 coverage
 !dist
+images
+src
 tests
+prettier.config.js
+tsconfig.js
+tsconfig.test.json
