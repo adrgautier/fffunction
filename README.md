@@ -23,7 +23,7 @@ const random = fffunction
       if (input === "number") {
         return output(Math.random());
       }
-      return output(uuid.v4());
+      return output(uuidv4());
     });
 ```
 
@@ -179,7 +179,7 @@ fffunction
 
 ### Optional "ad hoc" mode
 
-You can enable the **"ad hoc" mode** by giving the true to the generic :
+You can enable the **"ad hoc" mode** by passing true to the generic :
 
 ```ts
 .f<true>(implementation);

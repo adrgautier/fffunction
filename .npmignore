@@ -5,5 +5,5 @@ images
 src
 tests
 prettier.config.js
-tsconfig.js
+tsconfig.json
 tsconfig.test.json

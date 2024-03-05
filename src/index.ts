@@ -10,6 +10,10 @@ import {
 class FFFunction<TTuples extends FFFTuple[] = []> {
   /**
    * Add new overload declaration.
+   * @example
+   * const overload = fffunction
+   *    .f<'string', string>()
+   *    .f<'number', number>()
    */
   f<
     TInput,
@@ -18,7 +22,13 @@ class FFFunction<TTuples extends FFFTuple[] = []> {
 
   /**
    * Implement function.
-   * @param implementation
+   * @example
+   * .f(({ input, output }) => {
+   *     if (input === 'string') {
+   *       return output(uuidv4());
+   *     }
+   *     return output(Math.random());
+   *   });
    */
   f<TAdHoc extends boolean = false>(
     implementation: InferImplementation<TTuples>
