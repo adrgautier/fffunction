@@ -1,47 +1,49 @@
-import { FFFArgument } from './classes';
+import { tupleFactory } from './tupleFactory';
 import {
-  FFFTuple,
+  AnySignature,
+  InferAcceptedArgs,
   InferConditionalReturnFunction,
   InferDeclarationConstraint,
   InferFunctionOverload,
   InferImplementation,
 } from './types';
 
-class FFFunction<TTuples extends FFFTuple[] = []> {
+class FFFunction<TSignatures extends AnySignature[] = []> {
   /**
-   * Add new overload declaration.
+   * Add new signature declaration.
    * @example
-   * const overload = fffunction
-   *    .f<'string', string>()
-   *    .f<'number', number>()
+   * fffunction
+   *    .f<(a: 'string') => string>()
+   *    .f<(b: 'number') => number>()
    */
   f<
-    TInput,
-    TOutput extends InferDeclarationConstraint<TTuples, TInput>,
-  >(): FFFunction<[...TTuples, [TInput, TOutput]]>;
+    TSignature extends (
+      ...args: any
+    ) => InferDeclarationConstraint<TSignatures, TSignature>,
+  >(): FFFunction<[...TSignatures, TSignature]>;
 
   /**
    * Implement function.
    * @example
-   * .f(({ input, output }) => {
-   *     if (input === 'string') {
-   *       return output(uuidv4());
+   * .f(([_check, arg]) => {
+   *     if (arg === 'string') {
+   *       return _check(uuidv4());
    *     }
-   *     return output(Math.random());
+   *     return _check(Math.random());
    *   });
    */
-  f<TAdHoc extends boolean = false>(
-    implementation: InferImplementation<TTuples>
-  ): TAdHoc extends true
-    ? InferFunctionOverload<TTuples>
-    : InferConditionalReturnFunction<TTuples>;
+  f<TMode extends 'overload' | 'condition' = 'condition'>(
+    implementation: InferImplementation<TSignatures>
+  ): TMode extends 'overload'
+    ? InferFunctionOverload<TSignatures>
+    : InferConditionalReturnFunction<TSignatures>;
 
-  f(implementation?: InferImplementation<any>) {
+  f(implementation?: InferImplementation<TSignatures>) {
     if (!implementation) {
       return new FFFunction() as any;
     }
-    return (input: unknown) => {
-      return implementation(new FFFArgument(input)).get();
+    return (...args: InferAcceptedArgs<TSignatures>) => {
+      return implementation(tupleFactory<TSignatures>(...args)).get();
     };
   }
 }

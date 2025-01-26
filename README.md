@@ -17,13 +17,13 @@ Here is an example of a function which return either a random `number` or a rand
 
 ```ts
 const random = fffunction
-    .f<"number", number>()
-    .f<"string", string>()
-    .f(function ({ input, output }) {
-      if (input === "number") {
-        return output(Math.random());
+    .f<(type: "number") => number>()
+    .f<(type: "string") => string>()
+    .f(function ([_check, type]) {
+      if (arg === "number") {
+        return _check(Math.random());
       }
-      return output(uuidv4());
+      return _check(uuidv4());
     });
 ```
 
@@ -38,29 +38,35 @@ If the value `"string"` is provided, an uuid will be returned.
 console.log(random("string")); // 425dd1a0-cfc0-4eac-a2d7-486860d9bdd4
 ```
 
-The returned type **is guaranted** by the `output` function.
+The returned type **is guaranted** by the `_check` function.
 
 # How to use 
 
 ## Signatures declaration
 
-### `.f<TInput, TOutput>()`
+### `.f<TSignature>()`
 
-Declaring a function signature is done by calling the `.f()` method with no argument and using the generic as follow:
+Declaring a function signature is done by calling the `.f()` method with no argument by passing the function signature as follow:
 
 ```ts
 fffunction
-   .f<"string", string>()
+   .f<(type: "string") => string>()
 ```
-
-The **first argument** in the generic defines the accepted **input** type. The **second argument** defines the expected **return / output** type.
 
 Signature declarations are queued like this:
 
 ```ts
 fffunction
-   .f<"string", string>()
-   .f<"number", number>()
+   .f<(type: "string") => string>()
+   .f<(type: "number") => number>()
+```
+
+A signature can expect multiple arguments:
+
+```ts
+fffunction
+   .f<(type: "string", mode: "v4") => string>()
+   .f<(type: "number") => number>()
 ```
 
 ### Constraints
@@ -69,79 +75,96 @@ Input types can overlap each others, however the **most specific** input types m
 
 ```ts
 fffunction
-   .f<{ id: number, name: string }, Profile>()
-   .f<{ id: number }, Item>()
+   .f<(i: { id: number, name: string }) => Profile>()
+   .f<(i: { id: number }) => Item>()
 ```
 
 *fffunction* prevents declaring signatures in the **wrong order**:
 
 ```ts
 fffunction
-   .f<{ id: number }, Item>() 
-   .f<{ id: number, name: string }, Profile>()
-                                    ^^^^^^^ 
+   .f<(i: { id: number }) => Item>() 
+   .f<(i: { id: number, name: string }) => Profile>()
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
 // Type 'Profile' does not satisfy the constraint 'never'. ts(2344)
 ```
 
-*Literals* **cannot overlap** each others:
+*Primitive* types **cannot overlap** each others:
 
 ```ts
 fffunction
-   .f<`https://${string}`, URL>() 
-   .f<string, string>() 
-              ^^^^^^   
+   .f<(a: `https://${string}`) => URL>() 
+   .f<(a: string) => string>() 
+      ^^^^^^^^^^^^^^^^^^^^^   
 // Type 'string' does not satisfy the constraint 'never'. ts(2344)
 ```
 
 This ensures that each input type can be **narrowed down** later in the function implementation. 
 
+### About generic function
+
+You can provide a generic signature function to constrain the function arguments:
+```ts
+fffunction
+   .f<<TType extends string>(type: TType, content: { type: TType, description: string }) => string>() 
+```
+However, it **should not** be used to declare the return type:
+```ts
+fffunction
+   .f<<TValue extends string>(value: TValue) => Promise<TValue>>() 
+```
+
+This is for two reasons:
+- the inference only works in "overload mode"
+- the implementation function **cannot check* if the returned value has the proper subset
+
 ## Function implementation  
 
-### `.f<TAdHoc>(implementation)`
+### `.f<TMode>(implementation)`
 
 The implementation of the function is based on the concept of [type narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html).
 
 ```ts
 /*...*/
-   .f(function implementation({ input, output }) { /*...*/ })
+   .f(function implementation([_check, arg1, arg2, ...args]) { /*...*/ })
 ```
 
-The `implementation` function (named here for the example) will receive a `FFFArgument` object. This argument carries two informations :
-- the input value on the `input` property
-- the `output()` method (more on that later)
+The `implementation` function (named here for the example) will receive a tuple. This argument carries:
+- the "check" function that ensures the return value is narrowed down enought
+- the argument(s) provided in the same order as declared in the signatures
 
 ### Narrowing type
 
-In the main scope of the function, the type of the `input` property is **uncertain**. It can be either of the input types defined in the signatures. We want to create a narrowed scope for each possible type :
+In the main scope of the function, the type of `arg` is **uncertain**. It can be either of the argument types defined in the signatures. We want to create a narrowed scope for each possible type :
 
 ```ts
-function implementation ({ input, output }) {
-   // input is "number" | "string"
-   if (input === "number") {
-      // input is "number"
+function implementation ([_check, arg]) {
+   // arg is "number" | "string"
+   if (arg === "number") {
+      // arg is "number"
    } else {
-      // input is "string"
+      // arg is "string"
    }
 })
 ```
 
-### `output()`
+### `_check()`
 
-Behind the scene, TypeScript is also able to narrow down the type of the `output()` method. This method will make sure the returned value **matches the expected output type**.
+Behind the scene, TypeScript is also able to narrow down the type of the `_arg()` function. This function will make sure the returned value **matches the expected return type**.
 
 ```ts
-function implementation ({ input, output }) {
-   if (input === "number") {
-      return output(1234);
+function implementation ([_check, arg]) {
+   if (arg === "number") {
+      return _check(1234);
    }
-   return output('test');
+   return _check('test');
 })
 ```
 
-> This method is **mandatory**. You can't return any value without using this method.  
+> This function is **mandatory**. You can't return any value without using this method.  
 > In fact, it must also be called for **void returns** :
 > ```ts
-> return output();
+> return _check();
 > ```
 
 
@@ -151,15 +174,15 @@ Out of the box, you will only be able to **narrow the input** type from *literal
 
 ```ts
 fffunction
-   .f<{ id: number, name: string }, 'profile'>()
-   .f<{ id: number }, 'item'>()
-   .f(({ input, output }) => {
-      if('name' in input) {
-         return output('profile');
+   .f<(i: { id: number, name: string }) => 'profile'>()
+   .f<(i: { id: number }) => 'item'>()
+   .f(([_check, arg]) => {
+      if('name' in arg) {
+         return _check('profile');
                        ^^^^^^^^^
          // Type 'string' does not satisfy the constraint 'never'. ts(2344)
       }
-      return output('item');
+      return _check('item');
    });
 ```
 
@@ -167,22 +190,22 @@ If you need to work **with objects** in input, I recommand using **[ts-pattern](
 
 ```ts
 fffunction
-   .f<{ id: number, name: string }, 'profile'>()
-   .f<{ id: number }, 'item'>()
-   .f((a) => 
-      match(a)
-         .with({ input: { name: P.string } }, ({ output }) => output('profile'))
-         .otherwise(({ output }) => output('item'))
+   .f<(i: { id: number, name: string }) => 'profile'>()
+   .f<(i: { id: number }) => 'item'>()
+   .f((u) => 
+      match(u)
+         .with([P._, { name: P.string }], ([_check]) => _check('profile'))
+         .otherwise(([_check]) => _check('item'))
    );
 ```
 
 
-### Optional "ad hoc" mode
+### Optional "overload" mode
 
-You can enable the **"ad hoc" mode** by passing true to the generic :
+You can enable the **"overload" mode** by passing "overload" to the generic :
 
 ```ts
-.f<true>(implementation);
+.f<'overload'>(implementation);
 ```
 
 This mode allow to declare the polymorphic function using [function overloading](https://www.typescriptlang.org/docs/handbook/2/functions.html#function-overloads) instead of conditional return type.
@@ -192,7 +215,7 @@ This mode allow to declare the polymorphic function using [function overloading]
 This can make the resulting function easier to understand with each signature individially identifiable.
 
 
-|Default|Ad hoc|
+|Conditional (default)|Overloaded|
 |-------|------|
 |![conditional suggestion](./images/conditional_declaration.png)|![overload suggestion](./images/overload_declaration.png)|
 
@@ -215,8 +238,8 @@ With the above example, `mode` must be either `"string"` or `"number"`. The unce
 ### `TS2344: Type 'A' does not satisfy the constraint 'never'`
 
 ```ts
-.f<"string", string>()
-             ^^^^^^
+.f<(a: "string") => string>()
+   ^^^^^^^^^^^^^^^^^^^^^^^
 ```
 
 That means input of two signatures are conflicting. See the **input overlapping** section above.
@@ -227,19 +250,19 @@ That means input of two signatures are conflicting. See the **input overlapping*
 ### `TS2344: Type 'A' does not satisfy the constraint 'never'`
 
 ```ts
-return output(value);
+return _check(value);
               ^^^^^ 
 ```
 
-The type `input` type has not been narrowed down enough or properly.
+The arguments type has not been narrowed down enough or properly.
 
 
-### `TS2322: Type 'A' is not assignable to type 'FFFOutput<A | B>'`
+### `TS2322: Type 'A' is not assignable to type 'Checked<A | B>'`
 
 ```ts
 return value;
        ^^^^^ 
 ```
 
-You are trying to return a value without the `output` function.
+You are trying to return a value without the `check` function.
 

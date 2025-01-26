@@ -11,36 +11,36 @@ import { fffunction } from '../src';
  */
 
 fffunction
-  .f<string, { test2: 'test2' }>()
-  .f<number, { test: 'test' }>()
-  .f(function implementation({ input, output }) {
-    return output({ test: 'test', test2: 'test2' });
+  .f<(a: string) => { test2: 'test2' }>()
+  .f<(b: number) => { test: 'test' }>()
+  .f(function implementation([_check]) {
+    return _check({ test: 'test', test2: 'test2' });
   });
 
 fffunction
-  .f<string, string>()
+  .f<(a: string) => string>()
   // @ts-expect-error
-  .f<string, number>();
+  .f<(b: string) => number>();
 
 fffunction
-  .f<`https://${string}`, URL>()
+  .f<(a: `https://${string}`) => URL>()
   // @ts-expect-error
-  .f<string, string>();
+  .f<(b: string) => string>();
 
 fffunction
-  .f<'string', string>()
-  .f<'void', void>()
-  .f(({ input, output }) => {
-    if (input === 'string') {
-      return output('test');
+  .f<(a: 'string') => string>()
+  .f<(a: 'void') => void>()
+  .f(([_check, arg]) => {
+    if (arg === 'string') {
+      return _check('test');
     }
-    return output();
+    return _check();
   });
 
 const overload = fffunction
-  .f<'string', string>()
-  .f<'number', number>()
-  .f<true>((() => {}) as any);
+  .f<(a: 'string') => string>()
+  .f<(b: 'number') => number>()
+  .f<'overload'>((() => {}) as any);
 
 expectType<((i: 'string') => string) & ((i: 'number') => number)>(overload);
 
@@ -52,8 +52,8 @@ expectType<
 >(true);
 
 const conditional = fffunction
-  .f<'string', string>()
-  .f<'number', number>()
+  .f<(a: 'string') => string>()
+  .f<(b: 'number') => number>()
   .f((() => {}) as any);
 
 expectType<((i: 'string') => string) & ((i: 'number') => number)>(conditional);

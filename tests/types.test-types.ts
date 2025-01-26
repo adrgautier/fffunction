@@ -5,28 +5,17 @@
  */
 import { expectType, TypeEqual, TypeOf } from 'ts-expect';
 import {
-  FFFTuple,
-  InferAcceptedInputs,
-  InferAcceptedOutputs,
+  InferAcceptedArgs,
+  InferAcceptedReturnTypes,
   InferConditionalReturnFunction,
   InferDeclarationConstraint,
-  InferExpectedOutput,
+  InferExpectedReturnType,
   InferFunctionOverload,
   InferImplementation,
-  InferImplementationArgument,
+  InferImplementationTuple,
   InferLiteralDeclarationConstraint,
 } from '../src/types';
-import { FFFArgument, FFFOutput } from '../src/classes';
-
-/**
- * FFFTuple
- */
-
-expectType<TypeEqual<FFFTuple<'number', number>, ['number', number]>>(true);
-
-expectType<TypeEqual<FFFTuple<'string', string>, ['string', string]>>(true);
-
-expectType<TypeEqual<FFFTuple<URL, void>, [URL, void]>>(true);
+import { Checked } from '../src/classes';
 
 /**
  * InferAcceptedInputs
@@ -34,59 +23,58 @@ expectType<TypeEqual<FFFTuple<URL, void>, [URL, void]>>(true);
 
 expectType<
   TypeEqual<
-    InferAcceptedInputs<[['number', number], ['string', string]]>,
-    'number' | 'string'
+    InferAcceptedArgs<[(a: 'number') => number, (a: 'string') => string]>,
+    ['number'] | ['string']
   >
 >(true);
 
 expectType<
   TypeEqual<
-    InferAcceptedInputs<[['number', number], ['string', string]]>,
-    'number' | 'symbol'
+    InferAcceptedArgs<
+      [(a1: 'number', a2: number) => number, (a: 'string') => string]
+    >,
+    ['number', number] | ['string']
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+    InferAcceptedArgs<[(a: 'number') => number, (a: 'string') => string]>,
+    ['number'] | ['symbol']
   >
 >(false);
 
 /**
- * InferAcceptedOutputs
+ * InferAcceptedReturnTypes
  */
 
 expectType<
   TypeEqual<
-    InferAcceptedOutputs<[['number', number], ['string', string]]>,
+    InferAcceptedReturnTypes<
+      [(a: 'number') => number, (a: 'string') => string]
+    >,
     number | string
   >
 >(true);
 
 expectType<
   TypeEqual<
-    InferAcceptedOutputs<[['number', number], ['string', string]]>,
+    InferAcceptedReturnTypes<
+      [(a: 'number') => number, (a: 'string') => string]
+    >,
     number | symbol
   >
 >(false);
 
 /**
- * InferExpectedOutput
+ * InferExpectedReturnType
  */
 
 expectType<
   TypeEqual<
-    InferExpectedOutput<[['number', number], ['string', string]], 'number'>,
-    number
-  >
->(true);
-
-expectType<
-  TypeEqual<
-    InferExpectedOutput<[['number', number], ['string', string]], 'string'>,
-    string
-  >
->(true);
-
-expectType<
-  TypeEqual<
-    InferExpectedOutput<
-      [[{ test: 'test'; test2: 'test2' }, string], [{ test: 'test' }, number]],
-      { test: 'test' }
+    InferExpectedReturnType<
+      [(a: 'number') => number, (a: 'string') => string],
+      ['number']
     >,
     number
   >
@@ -94,9 +82,9 @@ expectType<
 
 expectType<
   TypeEqual<
-    InferExpectedOutput<
-      [[{ test: 'test'; test2: 'test2' }, string], [{ test: 'test' }, number]],
-      { test: 'test'; test2: 'test2' }
+    InferExpectedReturnType<
+      [(a: 'number') => number, (a: 'string') => string],
+      ['string']
     >,
     string
   >
@@ -104,12 +92,25 @@ expectType<
 
 expectType<
   TypeEqual<
-    InferExpectedOutput<
+    InferExpectedReturnType<
       [
-        [{ type: 'string'; value: number }, string],
-        [{ type: 'number'; value: number }, number],
+        (a: { test: 'test'; test2: 'test2' }) => string,
+        (a: { test: 'test' }) => number,
       ],
-      { type: 'string'; value: number }
+      [{ test: 'test' }]
+    >,
+    number
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+    InferExpectedReturnType<
+      [
+        (a: { test: 'test'; test2: 'test2' }) => string,
+        (a: { test: 'test' }) => number,
+      ],
+      [{ test: 'test'; test2: 'test2' }]
     >,
     string
   >
@@ -117,14 +118,33 @@ expectType<
 
 expectType<
   TypeEqual<
-    InferExpectedOutput<[[string, string], [number, number]], string>,
+    InferExpectedReturnType<
+      [
+        (a: { type: 'string'; value: number }) => string,
+        (a: { type: 'number'; value: number }) => number,
+      ],
+      [{ type: 'string'; value: number }]
+    >,
     string
   >
 >(true);
 
 expectType<
   TypeEqual<
-    InferExpectedOutput<[[string, string], [number, number]], number>,
+    InferExpectedReturnType<
+      [(a: string) => string, (a: number) => number],
+      [string]
+    >,
+    string
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+    InferExpectedReturnType<
+      [(a: string) => string, (a: number) => number],
+      [number]
+    >,
     number
   >
 >(true);
@@ -135,23 +155,19 @@ expectType<
 
 expectType<
   TypeEqual<
-    InferDeclarationConstraint<[['number', any], ['string', string]], 'number'>,
+    InferDeclarationConstraint<
+      [(a: 'number') => any, (a: 'string') => string],
+      (a: 'number') => number
+    >,
     never
   >
 >(true);
 
 expectType<
   TypeEqual<
-    InferDeclarationConstraint<[['number', any], ['string', any]], 'nmb'>,
-    unknown
-  >
->(true);
-
-expectType<
-  TypeEqual<
     InferDeclarationConstraint<
-      [[{ test: 'test'; test2: 'test2' }, any]],
-      { test: 'test' }
+      [(a: 'number') => any, (a: 'string') => any],
+      (a: 'nmb') => number
     >,
     unknown
   >
@@ -160,8 +176,18 @@ expectType<
 expectType<
   TypeEqual<
     InferDeclarationConstraint<
-      [[{ test: 'test' }, any]],
-      { test: 'test'; test2: 'test2' }
+      [(a: { test: 'test'; test2: 'test2' }) => any],
+      (a: { test: 'test' }) => any
+    >,
+    unknown
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+    InferDeclarationConstraint<
+      [(a: { test: 'test' }) => any],
+      (a: { test: 'test'; test2: 'test2' }) => any
     >,
     never
   >
@@ -169,36 +195,57 @@ expectType<
 
 expectType<
   TypeEqual<
-    InferDeclarationConstraint<[[string, any]], `https://${string}`>,
+    InferDeclarationConstraint<
+      [(a: string) => any],
+      (a: `https://${string}`) => URL
+    >,
     never
   >
 >(true);
 
 expectType<
   TypeEqual<
-    InferDeclarationConstraint<[[`https://${string}`, any]], string>,
+    InferDeclarationConstraint<
+      [(a: `https://${string}`) => any],
+      (a: string) => string
+    >,
     never
   >
 >(true);
 
 expectType<
-  TypeEqual<InferDeclarationConstraint<[[boolean, any]], true>, never>
+  TypeEqual<
+    InferDeclarationConstraint<[(a: boolean) => any], (a: true) => any>,
+    never
+  >
 >(true);
 
 expectType<
-  TypeEqual<InferDeclarationConstraint<[[boolean, any]], false>, never>
+  TypeEqual<
+    InferDeclarationConstraint<[(a: boolean) => any], (a: false) => any>,
+    never
+  >
 >(true);
 
 expectType<
-  TypeEqual<InferDeclarationConstraint<[[true, any]], boolean>, never>
+  TypeEqual<
+    InferDeclarationConstraint<[(a: true) => any], (a: boolean) => any>,
+    never
+  >
 >(true);
 
 expectType<
-  TypeEqual<InferDeclarationConstraint<[[false, any]], boolean>, never>
+  TypeEqual<
+    InferDeclarationConstraint<[(a: false) => any], (a: boolean) => any>,
+    never
+  >
 >(true);
 
 expectType<
-  TypeEqual<InferDeclarationConstraint<[[false, any]], true>, unknown>
+  TypeEqual<
+    InferDeclarationConstraint<[(a: false) => any], (a: true) => any>,
+    unknown
+  >
 >(true);
 
 /**
@@ -206,16 +253,52 @@ expectType<
  */
 
 expectType<
-  TypeEqual<InferLiteralDeclarationConstraint<[[false, any]], boolean>, never>
+  TypeEqual<
+    InferLiteralDeclarationConstraint<[(a: false) => any], [boolean]>,
+    never
+  >
 >(true);
 
 expectType<
-  TypeEqual<InferLiteralDeclarationConstraint<[['string', any]], string>, never>
+  TypeEqual<
+    InferLiteralDeclarationConstraint<[(a: 'string') => any], [string]>,
+    never
+  >
 >(true);
 
 expectType<
-  TypeEqual<InferLiteralDeclarationConstraint<[[1, any]], number>, never>
+  TypeEqual<InferLiteralDeclarationConstraint<[(a: 1) => any], [number]>, never>
 >(true);
+
+expectType<
+  TypeEqual<
+    InferLiteralDeclarationConstraint<
+      [(a0: 1, a1: 'one') => any],
+      [number, string]
+    >,
+    never
+  >
+>(true);
+
+expectType<
+  TypeEqual<
+    InferLiteralDeclarationConstraint<
+      [(a0: 1, a1: 'one') => any],
+      [string, number]
+    >,
+    never
+  >
+>(false);
+
+expectType<
+  TypeEqual<
+    InferLiteralDeclarationConstraint<
+      [(a0: 1, a1: 'one') => any],
+      [number, string, boolean]
+    >,
+    never
+  >
+>(false);
 
 /**
  * InferConditionalReturnFunction
@@ -223,15 +306,19 @@ expectType<
 
 expectType<
   TypeOf<
-    (i: 'number' | 'string') => number | string,
-    InferConditionalReturnFunction<[['number', number], ['string', string]]>
+    (a: 'number' | 'string') => number | string,
+    InferConditionalReturnFunction<
+      [(a: 'number') => number, (a: 'string') => string]
+    >
   >
 >(true);
 
 expectType<
   TypeEqual<
     ReturnType<
-      InferConditionalReturnFunction<[['number', number], ['string', string]]>
+      InferConditionalReturnFunction<
+        [(a: 'number') => number, (a: 'string') => string]
+      >
     >,
     number | string
   >
@@ -243,45 +330,64 @@ expectType<
 
 expectType<
   TypeEqual<
-    InferFunctionOverload<[['number', number], ['string', string]]>,
-    ((i: 'number') => number) & ((i: 'string') => string)
+    InferFunctionOverload<[(a: 'number') => number, (a: 'string') => string]>,
+    ((a: 'number') => number) & ((a: 'string') => string)
   >
 >(true);
 
 /**
- * InferImplementationArgument
+ * InferImplementationTuple
  */
 
 expectType<
   TypeEqual<
-    InferImplementationArgument<[['number', number], ['string', string]]>,
-    FFFArgument<'number', number> | FFFArgument<'string', string>
+    InferImplementationTuple<
+      [(a: 'number') => number, (a: 'string') => string]
+    >,
+    | [(i: number) => Checked<number>, 'number']
+    | [(i: string) => Checked<string>, 'string']
   >
 >(true);
 
 expectType<
   TypeEqual<
-    InferImplementationArgument<
-      [[{ id: number; name: string }, 'profile'], [{ id: number }, 'item']]
+    InferImplementationTuple<
+      [
+        (a: { id: number; name: string }) => 'profile',
+        (a: { id: number }) => 'item',
+      ]
     >,
-    | FFFArgument<{ id: number; name: string }, 'profile'>
-    | FFFArgument<{ id: number }, 'item'>
+    | [
+        (i: 'profile') => Checked<'profile'>,
+        {
+          id: number;
+          name: string;
+        },
+      ]
+    | [
+        (i: 'item') => Checked<'item'>,
+        {
+          id: number;
+        },
+      ]
   >
 >(true);
 
 /**
  * InferImplementation
  */
-
 expectType<
   TypeEqual<
     InferImplementation<
-      [[{ id: number; name: string }, 'profile'], [{ id: number }, 'item']]
+      [
+        (a: { id: number; name: string }) => 'profile',
+        (a: { id: number }) => 'item',
+      ]
     >,
     (
       a:
-        | FFFArgument<{ id: number; name: string }, 'profile'>
-        | FFFArgument<{ id: number }, 'item'>
-    ) => FFFOutput<'profile' | 'item'>
+        | [(i: 'profile') => Checked<'profile'>, { id: number; name: string }]
+        | [(i: 'item') => Checked<'item'>, { id: number }]
+    ) => Checked<'profile' | 'item'>
   >
 >(true);

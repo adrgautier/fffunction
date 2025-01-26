@@ -1,1 +1,1 @@
-export const OUTPUT_SYMBOL = Symbol();
+export const CHECKED_SYMBOL = Symbol();
