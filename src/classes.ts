@@ -1,21 +1,13 @@
-import { OUTPUT_SYMBOL } from './constant';
+import { CHECKED_SYMBOL } from './constant';
 
-export class FFFOutput<TOutput> {
-  private [OUTPUT_SYMBOL]: TOutput;
+export class Checked<TReturnType> {
+  private [CHECKED_SYMBOL]: TReturnType;
 
-  constructor(output: TOutput) {
-    this[OUTPUT_SYMBOL] = output;
+  constructor(returnedValue: TReturnType) {
+    this[CHECKED_SYMBOL] = returnedValue;
   }
+
   get() {
-    return this[OUTPUT_SYMBOL];
-  }
-}
-
-export class FFFArgument<TInput extends unknown, TOutput extends unknown> {
-  public input: TInput;
-  public output = (output: TOutput) => new FFFOutput(output);
-
-  constructor(input: TInput) {
-    this.input = input;
+    return this[CHECKED_SYMBOL];
   }
 }

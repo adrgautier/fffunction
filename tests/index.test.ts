@@ -5,14 +5,14 @@ describe('fffunction', () => {
   it('should return the correct value according to the input (literal)', () => {
     // Given
     const random = fffunction
-      .f<'number', number>()
-      .f<'string', string>()
-      .f(({ input, output }) => {
+      .f<(a: 'string') => string>()
+      .f<(b: 'number') => number>()
+      .f(([check, u]) => {
         const randomNumber = Math.random();
-        if (input === 'number') {
-          return output(randomNumber);
+        if (u === 'number') {
+          return check(randomNumber);
         }
-        return output(String(randomNumber));
+        return check(String(randomNumber));
       });
 
     // Then
@@ -22,14 +22,14 @@ describe('fffunction', () => {
   it('should return the correct value according to the input (literal 2)', () => {
     // Given
     const format = fffunction
-      .f<string, string>()
-      .f<number, number>()
-      .f<symbol, symbol>()
-      .f(a =>
-        match(a)
-          .with({ input: P.string }, ({ output }) => output('one'))
-          .with({ input: P.number }, ({ output }) => output(1))
-          .with({ input: P.symbol }, ({ output }) => output(Symbol()))
+      .f<<A extends string>(a: A) => A>()
+      .f<<B extends number>(b: B) => B>()
+      .f<<C extends symbol>(c: C) => C>()
+      .f(u =>
+        match(u)
+          .with([P._, P.string], ([check]) => check('one'))
+          .with([P._, P.number], ([check]) => check(1))
+          .with([P._, P.symbol], ([check]) => check(Symbol()))
           .exhaustive()
       );
 
@@ -42,14 +42,12 @@ describe('fffunction', () => {
   it('should return the correct value according to the input (object)', () => {
     // Given
     const discriminate = fffunction
-      .f<{ id: number; name: string }, 'profile'>()
-      .f<{ id: number }, 'item'>()
-      .f(a =>
-        match(a)
-          .with({ input: { name: P.string } }, ({ output }) =>
-            output('profile')
-          )
-          .otherwise(({ output }) => output('item'))
+      .f<(a: { id: number; name: string }) => 'profile'>()
+      .f<(b: { id: number }) => 'item'>()
+      .f(u =>
+        match(u)
+          .with([P._, { name: P.string }], ([check]) => check('profile'))
+          .otherwise(([check]) => check('item'))
       );
 
     // Then
@@ -59,13 +57,13 @@ describe('fffunction', () => {
 
   it('should work with void return', () => {
     const poly = fffunction
-      .f<'string', string>()
-      .f<'void', void>()
-      .f(({ input, output }) => {
-        if (input === 'string') {
-          return output('test');
+      .f<(a: 'string') => string>()
+      .f<(b: 'void') => void>()
+      .f(([check, u]) => {
+        if (u === 'string') {
+          return check('test');
         }
-        return output();
+        return check();
       });
     expect(typeof poly('void')).toBe('undefined');
     expect(typeof poly('string')).toBe('string');
