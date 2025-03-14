@@ -5,6 +5,7 @@ import type {
 	InferDeclarationConstraint,
 	InferFunctionOverload,
 	InferImplementation,
+	InferNew,
 } from "./types";
 
 type FFFunction<TSignatures extends AnySignature[] = []> = {
@@ -37,8 +38,9 @@ type FFFunction<TSignatures extends AnySignature[] = []> = {
 	): TMode extends "overload"
 		? InferFunctionOverload<TSignatures>
 		: InferConditionalReturnFunction<TSignatures>;
-};
+} & InferNew<TSignatures>;
 
+// @ts-expect-error
 // biome-ignore-start lint/suspicious/noExplicitAny: type safety not needed for runtime logic
 export const fffunction: FFFunction<[]> = {
 	f(implementation?: any) {

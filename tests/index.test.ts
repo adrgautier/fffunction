@@ -69,4 +69,25 @@ describe("fffunction", () => {
 		expect(typeof poly("void")).toBe("undefined");
 		expect(typeof poly("string")).toBe("string");
 	});
+
+	it("should work with conditional return type", () => {
+		const signature = fffunction
+			.f<(a: "string") => string>()
+			.f<(b: "number") => void>();
+
+		function random<T extends "string" | "number">(
+			mode: T,
+		): ReturnType<typeof signature<T>> {
+			const randomNumber = Math.random();
+
+			if (mode === "string") {
+				return String(randomNumber);
+			}
+			return;
+		}
+
+		// Then
+		expect(typeof random("number")).toBe("undefined");
+		expect(typeof random("string")).toBe("string");
+	});
 });

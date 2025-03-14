@@ -122,6 +122,29 @@ export type InferConditionalReturnFunction<TSignatures extends AnySignature[]> =
 	) => InferExpectedReturnType<TSignatures, TArgs>;
 
 /**
+ * InferConditionalSignature
+ */
+export type InferNew<TSignatures extends AnySignature[]> = <
+	TArg extends InferAcceptedArgs<TSignatures>[0],
+>(
+	arg: TArg,
+) => InferAcceptedArgs<TSignatures> extends [any]
+	? InferNewCycle<TSignatures, TArg>
+	: never;
+
+export type InferNewCycle<
+	TSignatures extends AnySignature[],
+	TArg extends any,
+> = TSignatures extends [
+	infer TSignature extends AnySignature,
+	...infer TSignaturesRest extends AnySignature[],
+]
+	? TArg extends Parameters<TSignature>[0]
+		? ReturnType<TSignature>
+		: InferNewCycle<TSignaturesRest, TArg>
+	: never;
+
+/**
  * InferFunctionOverload
  *
  * @description Infers the final signature of the polymorphic function.
