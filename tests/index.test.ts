@@ -19,12 +19,13 @@ describe('fffunction', () => {
     expect(typeof random('number')).toBe('number');
     expect(typeof random('string')).toBe('string');
   });
-  it('should return the correct value according to the input (literal 2)', () => {
+
+  it('should return the correct value according to the input (type of)', () => {
     // Given
     const format = fffunction
-      .f<<A extends string>(a: A) => A>()
-      .f<<B extends number>(b: B) => B>()
-      .f<<C extends symbol>(c: C) => C>()
+      .f<(a: string) => string>()
+      .f<(b: number) => number>()
+      .f<(c: symbol) => symbol>()
       .f(u =>
         match(u)
           .with([P._, P.string], ([check]) => check('one'))

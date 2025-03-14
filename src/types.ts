@@ -8,6 +8,20 @@ type Literal = string | number | boolean;
 export type AnySignature = (...args: any) => any;
 
 /**
+ * ToNonGeneric
+ *
+ * @description Convert a generic signature to a non-generic one.
+ */
+type ToNonGeneric<T extends AnySignature> = (...args: Parameters<T>) => ReturnType<T>;
+
+/**
+ * IsGeneric
+ *
+ * @description Check if a signature is generic.
+ */
+type IsGeneric<T extends AnySignature> = T | ToNonGeneric<T> extends T & ToNonGeneric<T> ? false : true;
+
+/**
  * InferAcceptedArgs
  *
  * @description Infers accepted arguments from all signatures.
@@ -64,6 +78,8 @@ export type InferDeclarationConstraint<
   TNewSignature extends AnySignature,
   TNewArgs = Parameters<TNewSignature>, // somehow boolean becomes false, use a copy to bypass this issue
 > =
+  IsGeneric<TNewSignature> extends true ?
+    never :
   TNewArgs extends InferAcceptedArgs<TSignatures>
     ? never
     : TNewArgs extends Literal[]

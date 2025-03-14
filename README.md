@@ -19,11 +19,11 @@ Here is an example of a function which return either a random `number` or a rand
 const random = fffunction
     .f<(type: "number") => number>()
     .f<(type: "string") => string>()
-    .f(function ([_check, type]) {
+    .f(function ([check, type]) {
       if (arg === "number") {
-        return _check(Math.random());
+        return check(Math.random());
       }
-      return _check(uuidv4());
+      return check(uuidv4());
     });
 ```
 
@@ -115,7 +115,7 @@ fffunction
 ```
 
 This is for two reasons:
-- the inference only works in "overload mode"
+- the inference would only work in "overload mode"
 - the implementation function **cannot check* if the returned value has the proper subset
 
 ## Function implementation  
@@ -126,7 +126,7 @@ The implementation of the function is based on the concept of [type narrowing](h
 
 ```ts
 /*...*/
-   .f(function implementation([_check, arg1, arg2, ...args]) { /*...*/ })
+   .f(function implementation([check, arg1, arg2, ...args]) { /*...*/ })
 ```
 
 The `implementation` function (named here for the example) will receive a tuple. This argument carries:
@@ -138,7 +138,7 @@ The `implementation` function (named here for the example) will receive a tuple.
 In the main scope of the function, the type of `arg` is **uncertain**. It can be either of the argument types defined in the signatures. We want to create a narrowed scope for each possible type :
 
 ```ts
-function implementation ([_check, arg]) {
+function implementation ([check, arg]) {
    // arg is "number" | "string"
    if (arg === "number") {
       // arg is "number"
@@ -148,23 +148,23 @@ function implementation ([_check, arg]) {
 })
 ```
 
-### `_check()`
+### `check()`
 
-Behind the scene, TypeScript is also able to narrow down the type of the `_arg()` function. This function will make sure the returned value **matches the expected return type**.
+Behind the scene, TypeScript is also able to narrow down the type of the `check()` function. This function will make sure the returned value **matches the expected return type**.
 
 ```ts
-function implementation ([_check, arg]) {
+function implementation ([check, arg]) {
    if (arg === "number") {
-      return _check(1234);
+      return check(1234);
    }
-   return _check('test');
+   return check('test');
 })
 ```
 
 > This function is **mandatory**. You can't return any value without using this method.  
 > In fact, it must also be called for **void returns** :
 > ```ts
-> return _check();
+> return check();
 > ```
 
 
@@ -176,13 +176,13 @@ Out of the box, you will only be able to **narrow the input** type from *literal
 fffunction
    .f<(i: { id: number, name: string }) => 'profile'>()
    .f<(i: { id: number }) => 'item'>()
-   .f(([_check, arg]) => {
+   .f(([check, arg]) => {
       if('name' in arg) {
-         return _check('profile');
-                       ^^^^^^^^^
+         return check('profile');
+                      ^^^^^^^^^
          // Type 'string' does not satisfy the constraint 'never'. ts(2344)
       }
-      return _check('item');
+      return check('item');
    });
 ```
 
@@ -194,11 +194,10 @@ fffunction
    .f<(i: { id: number }) => 'item'>()
    .f((u) => 
       match(u)
-         .with([P._, { name: P.string }], ([_check]) => _check('profile'))
-         .otherwise(([_check]) => _check('item'))
+         .with([P._, { name: P.string }], ([check]) => check('profile'))
+         .otherwise(([check]) => check('item'))
    );
 ```
-
 
 ### Optional "overload" mode
 
@@ -214,12 +213,9 @@ This mode allow to declare the polymorphic function using [function overloading]
 
 This can make the resulting function easier to understand with each signature individially identifiable.
 
-
 |Conditional (default)|Overloaded|
 |-------|------|
 |![conditional suggestion](./images/conditional_declaration.png)|![overload suggestion](./images/overload_declaration.png)|
-
-
 
 #### Drawback
 
@@ -250,8 +246,8 @@ That means input of two signatures are conflicting. See the **input overlapping*
 ### `TS2344: Type 'A' does not satisfy the constraint 'never'`
 
 ```ts
-return _check(value);
-              ^^^^^ 
+return check(value);
+             ^^^^^ 
 ```
 
 The arguments type has not been narrowed down enough or properly.
@@ -265,4 +261,3 @@ return value;
 ```
 
 You are trying to return a value without the `check` function.
-

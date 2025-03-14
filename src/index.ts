@@ -1,14 +1,13 @@
 import { tupleFactory } from './tupleFactory';
 import {
   AnySignature,
-  InferAcceptedArgs,
   InferConditionalReturnFunction,
   InferDeclarationConstraint,
   InferFunctionOverload,
   InferImplementation,
 } from './types';
 
-class FFFunction<TSignatures extends AnySignature[] = []> {
+type FFFunction<TSignatures extends AnySignature[] = []> = {
   /**
    * Add new signature declaration.
    * @example
@@ -37,15 +36,16 @@ class FFFunction<TSignatures extends AnySignature[] = []> {
   ): TMode extends 'overload'
     ? InferFunctionOverload<TSignatures>
     : InferConditionalReturnFunction<TSignatures>;
+};
 
-  f(implementation?: InferImplementation<TSignatures>) {
+export const fffunction: FFFunction<[]> = {
+  f(implementation?: any) {
     if (!implementation) {
-      return new FFFunction() as any;
+      return this as any;
     }
-    return (...args: InferAcceptedArgs<TSignatures>) => {
-      return implementation(tupleFactory<TSignatures>(...args)).get();
+    return (...args: any[]) => {
+      return implementation(tupleFactory(...args)).get();
     };
   }
 }
 
-export const fffunction = new FFFunction();
