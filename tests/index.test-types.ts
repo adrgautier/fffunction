@@ -14,8 +14,8 @@ import { fffunction } from "../src";
 fffunction
 	.f<(a: string) => { test2: "test2" }>()
 	.f<(b: number) => { test: "test" }>()
-	.f(function implementation([_check]) {
-		return _check({ test: "test", test2: "test2" });
+	.f(function implementation([check]) {
+		return check({ test: "test", test2: "test2" });
 	});
 
 fffunction
@@ -31,11 +31,11 @@ fffunction
 fffunction
 	.f<(a: "string") => string>()
 	.f<(a: "void") => void>()
-	.f(([_check, arg]) => {
+	.f(([check, arg]) => {
 		if (arg === "string") {
-			return _check("test");
+			return check("test");
 		}
-		return _check();
+		return check();
 	});
 
 const overload = fffunction

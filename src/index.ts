@@ -25,11 +25,11 @@ type FFFunction<TSignatures extends AnySignature[] = []> = {
 	/**
 	 * Implement function.
 	 * @example
-	 * .f(([_check, arg]) => {
+	 * .f(([check, arg]) => {
 	 *     if (arg === 'string') {
-	 *       return _check(uuidv4());
+	 *       return check(uuidv4());
 	 *     }
-	 *     return _check(Math.random());
+	 *     return check(Math.random());
 	 *   });
 	 */
 	f<TMode extends "overload" | "condition" = "condition">(

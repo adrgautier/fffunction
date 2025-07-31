@@ -1,5 +1,5 @@
 # ![fffunction](./fffunction.svg)
- ![typescript](https://img.shields.io/badge/written%20for-typescript-3178c6?style=flat-square) [![codecov](https://img.shields.io/codecov/c/github/adrgautier/fffunction?style=flat-square&token=IPTGBDRRJE)](https://codecov.io/gh/adrgautier/fffunction) ![prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4?style=flat-square) [![npm](https://img.shields.io/npm/v/fffunction?style=flat-square)](https://www.npmjs.com/package/fffunction)
+ ![typescript](https://img.shields.io/badge/written%20for-typescript-3178c6?style=flat-square) ![biome](https://img.shields.io/badge/checked%20with-biome-60a5fa?style=flat-square) [![codecov](https://img.shields.io/codecov/c/github/adrgautier/fffunction?style=flat-square&token=IPTGBDRRJE)](https://codecov.io/gh/adrgautier/fffunction) [![npm](https://img.shields.io/npm/v/fffunction?style=flat-square)](https://www.npmjs.com/package/fffunction)
 
 **fffunction** is a tool which simplifies **polymorphic** functions declaration and adds **type constraints** to the implemention function.
 
@@ -20,7 +20,7 @@ const random = fffunction
     .f<(type: "number") => number>()
     .f<(type: "string") => string>()
     .f(function ([check, type]) {
-      if (arg === "number") {
+      if (type === "number") {
         return check(Math.random());
       }
       return check(uuidv4());
@@ -38,7 +38,7 @@ If the value `"string"` is provided, an uuid will be returned.
 console.log(random("string")); // 425dd1a0-cfc0-4eac-a2d7-486860d9bdd4
 ```
 
-The returned type **is guaranted** by the `_check` function.
+The returned type **is guaranted** by the `check` function.
 
 # How to use 
 
@@ -86,7 +86,7 @@ fffunction
    .f<(i: { id: number }) => Item>() 
    .f<(i: { id: number, name: string }) => Profile>()
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
-// Type 'Profile' does not satisfy the constraint 'never'. ts(2344)
+// Type 'Profile' is not assignable to type 'never'. ts(2344)
 ```
 
 *Primitive* types **cannot overlap** each others:
@@ -96,7 +96,7 @@ fffunction
    .f<(a: `https://${string}`) => URL>() 
    .f<(a: string) => string>() 
       ^^^^^^^^^^^^^^^^^^^^^   
-// Type 'string' does not satisfy the constraint 'never'. ts(2344)
+// Type 'string' is not assignable to type 'never'. ts(2344)
 ```
 
 This ensures that each input type can be **narrowed down** later in the function implementation. 
@@ -116,7 +116,7 @@ fffunction
 
 This is for two reasons:
 - the inference would only work in "overload mode"
-- the implementation function **cannot check* if the returned value has the proper subset
+- the implementation function **cannot check** if the returned value has the proper subset
 
 ## Function implementation  
 
@@ -130,12 +130,12 @@ The implementation of the function is based on the concept of [type narrowing](h
 ```
 
 The `implementation` function (named here for the example) will receive a tuple. This argument carries:
-- the "check" function that ensures the return value is narrowed down enought
+- the "check" function that ensures the return value is narrowed down enough
 - the argument(s) provided in the same order as declared in the signatures
 
 ### Narrowing type
 
-In the main scope of the function, the type of `arg` is **uncertain**. It can be either of the argument types defined in the signatures. We want to create a narrowed scope for each possible type :
+In the main scope of the function, the type of `arg` is **uncertain**. It can be either of the argument types defined in the signatures. We want to create a narrowed scope for each possible type:
 
 ```ts
 function implementation ([check, arg]) {
@@ -162,7 +162,7 @@ function implementation ([check, arg]) {
 ```
 
 > This function is **mandatory**. You can't return any value without using this method.  
-> In fact, it must also be called for **void returns** :
+> In fact, it must also be called for **void returns**:
 > ```ts
 > return check();
 > ```
@@ -180,7 +180,7 @@ fffunction
       if('name' in arg) {
          return check('profile');
                       ^^^^^^^^^
-         // Type 'string' does not satisfy the constraint 'never'. ts(2344)
+         // Argument of type '"profile"' is not assignable to parameter of type 'never'. ts(2345)
       }
       return check('item');
    });
@@ -201,7 +201,7 @@ fffunction
 
 ### Optional "overload" mode
 
-You can enable the **"overload" mode** by passing "overload" to the generic :
+You can enable the **"overload" mode** by passing "overload" to the generic:
 
 ```ts
 .f<'overload'>(implementation);
@@ -219,7 +219,7 @@ This can make the resulting function easier to understand with each signature in
 
 #### Drawback
 
-With this approach you loose the ability to call the function with uncertain input data. E.g. the following is not possible :
+With this approach you loose the ability to call the function with uncertain input data. E.g. the following is not possible:
 
 ```ts
 random(mode as "string" | "number"); // No overload matches this call.
@@ -231,7 +231,7 @@ With the above example, `mode` must be either `"string"` or `"number"`. The unce
 
 ## Signature declaration
 
-### `TS2344: Type 'A' does not satisfy the constraint 'never'`
+### `TS2344: Type 'A' is not assignable to type 'never'`
 
 ```ts
 .f<(a: "string") => string>()
@@ -243,7 +243,7 @@ That means input of two signatures are conflicting. See the **input overlapping*
 
 ## Function implementation
 
-### `TS2344: Type 'A' does not satisfy the constraint 'never'`
+### `TS2345: Argument of type 'A' is not assignable to parameter of type 'never'`
 
 ```ts
 return check(value);
