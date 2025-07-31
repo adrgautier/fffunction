@@ -1,13 +1,13 @@
-import { CHECKED_SYMBOL } from './constant';
+import { CHECKED_SYMBOL } from "./constant";
 
 export class Checked<TReturnType> {
-  private [CHECKED_SYMBOL]: TReturnType;
+	private [CHECKED_SYMBOL]: TReturnType;
 
-  constructor(returnedValue: TReturnType) {
-    this[CHECKED_SYMBOL] = returnedValue;
-  }
+	constructor(returnedValue: TReturnType) {
+		this[CHECKED_SYMBOL] = returnedValue;
+	}
 
-  get() {
-    return this[CHECKED_SYMBOL];
-  }
+	get() {
+		return this[CHECKED_SYMBOL];
+	}
 }

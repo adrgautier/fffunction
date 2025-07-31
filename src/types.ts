@@ -1,10 +1,11 @@
-import type { Checked } from './classes';
+import type { Checked } from "./classes";
 
 type Literal = string | number | boolean;
 
 /**
  * AnySignature
  */
+// biome-ignore lint/suspicious/noExplicitAny: intended for inference logic
 export type AnySignature = (...args: any) => any;
 
 /**
@@ -12,14 +13,19 @@ export type AnySignature = (...args: any) => any;
  *
  * @description Convert a generic signature to a non-generic one.
  */
-type ToNonGeneric<T extends AnySignature> = (...args: Parameters<T>) => ReturnType<T>;
+type ToNonGeneric<T extends AnySignature> = (
+	...args: Parameters<T>
+) => ReturnType<T>;
 
 /**
  * IsGeneric
  *
  * @description Check if a signature is generic.
  */
-type IsGeneric<T extends AnySignature> = T | ToNonGeneric<T> extends T & ToNonGeneric<T> ? false : true;
+type IsGeneric<T extends AnySignature> = T | ToNonGeneric<T> extends T &
+	ToNonGeneric<T>
+	? false
+	: true;
 
 /**
  * InferAcceptedArgs
@@ -27,7 +33,7 @@ type IsGeneric<T extends AnySignature> = T | ToNonGeneric<T> extends T & ToNonGe
  * @description Infers accepted arguments from all signatures.
  */
 export type InferAcceptedArgs<TSignatures extends AnySignature[]> =
-  TSignatures extends AnySignature[] ? Parameters<TSignatures[number]> : never;
+	TSignatures extends AnySignature[] ? Parameters<TSignatures[number]> : never;
 
 /**
  * InferAcceptedReturnTypes
@@ -35,9 +41,9 @@ export type InferAcceptedArgs<TSignatures extends AnySignature[]> =
  * @description Infers possible return types from all signatures.
  */
 export type InferAcceptedReturnTypes<TSignatures extends AnySignature[]> =
-  TSignatures extends (infer TSignature extends AnySignature)[]
-    ? ReturnType<TSignature>
-    : never;
+	TSignatures extends (infer TSignature extends AnySignature)[]
+		? ReturnType<TSignature>
+		: never;
 
 /**
  * InferMatchingSignature
@@ -45,16 +51,16 @@ export type InferAcceptedReturnTypes<TSignatures extends AnySignature[]> =
  * @description Infers the signature matching the arguments type.
  */
 export type InferMatchingSignature<
-  TSignatures extends AnySignature[],
-  TArgs extends InferAcceptedArgs<TSignatures>,
+	TSignatures extends AnySignature[],
+	TArgs extends InferAcceptedArgs<TSignatures>,
 > = TSignatures extends [
-  ...infer TSignaturesRest extends AnySignature[],
-  infer TSignature extends AnySignature,
+	...infer TSignaturesRest extends AnySignature[],
+	infer TSignature extends AnySignature,
 ]
-  ? TArgs extends InferAcceptedArgs<TSignaturesRest>
-    ? InferMatchingSignature<TSignaturesRest, TArgs>
-    : TSignature
-  : never;
+	? TArgs extends InferAcceptedArgs<TSignaturesRest>
+		? InferMatchingSignature<TSignaturesRest, TArgs>
+		: TSignature
+	: never;
 
 /**
  * InferExpectedReturnType
@@ -62,8 +68,8 @@ export type InferMatchingSignature<
  * @description Infers the expected return type according to the arguments type.
  */
 export type InferExpectedReturnType<
-  TSignatures extends AnySignature[],
-  TArgs extends InferAcceptedArgs<TSignatures>,
+	TSignatures extends AnySignature[],
+	TArgs extends InferAcceptedArgs<TSignatures>,
 > = ReturnType<InferMatchingSignature<TSignatures, TArgs>>;
 
 /**
@@ -74,17 +80,16 @@ export type InferExpectedReturnType<
  * A specific order must be respected in order for InferExpectedReturnType to work.
  */
 export type InferDeclarationConstraint<
-  TSignatures extends AnySignature[],
-  TNewSignature extends AnySignature,
-  TNewArgs = Parameters<TNewSignature>, // somehow boolean becomes false, use a copy to bypass this issue
-> =
-  IsGeneric<TNewSignature> extends true ?
-    never :
-  TNewArgs extends InferAcceptedArgs<TSignatures>
-    ? never
-    : TNewArgs extends Literal[]
-      ? InferLiteralDeclarationConstraint<TSignatures, TNewArgs>
-      : unknown;
+	TSignatures extends AnySignature[],
+	TNewSignature extends AnySignature,
+	TNewArgs = Parameters<TNewSignature>, // somehow boolean becomes false, use a copy to bypass this issue
+> = IsGeneric<TNewSignature> extends true
+	? never
+	: TNewArgs extends InferAcceptedArgs<TSignatures>
+		? never
+		: TNewArgs extends Literal[]
+			? InferLiteralDeclarationConstraint<TSignatures, TNewArgs>
+			: unknown;
 
 /**
  * InferLiteralDeclarationConstraint
@@ -93,16 +98,16 @@ export type InferDeclarationConstraint<
  * This constraint prevents Literals overlap.
  */
 export type InferLiteralDeclarationConstraint<
-  TSignatures extends AnySignature[],
-  TNewArgs extends Literal[],
+	TSignatures extends AnySignature[],
+	TNewArgs extends Literal[],
 > = TSignatures extends [
-  infer TSignature extends AnySignature,
-  ...infer TSignaturesRest extends AnySignature[],
+	infer TSignature extends AnySignature,
+	...infer TSignaturesRest extends AnySignature[],
 ]
-  ? Exclude<Parameters<TSignature>, TNewArgs> extends never
-    ? never
-    : InferLiteralDeclarationConstraint<TSignaturesRest, TNewArgs>
-  : unknown;
+	? Exclude<Parameters<TSignature>, TNewArgs> extends never
+		? never
+		: InferLiteralDeclarationConstraint<TSignaturesRest, TNewArgs>
+	: unknown;
 
 /**
  * InferConditionalReturnFunction
@@ -112,9 +117,9 @@ export type InferLiteralDeclarationConstraint<
  * This signature is returned in "default" mode.
  */
 export type InferConditionalReturnFunction<TSignatures extends AnySignature[]> =
-  <TArgs extends InferAcceptedArgs<TSignatures>>(
-    ...args: TArgs
-  ) => InferExpectedReturnType<TSignatures, TArgs>;
+	<TArgs extends InferAcceptedArgs<TSignatures>>(
+		...args: TArgs
+	) => InferExpectedReturnType<TSignatures, TArgs>;
 
 /**
  * InferFunctionOverload
@@ -124,14 +129,14 @@ export type InferConditionalReturnFunction<TSignatures extends AnySignature[]> =
  * This signature is returned in "ad hoc" mode.
  */
 export type InferFunctionOverload<
-  TSignatures extends AnySignature[],
-  TFunctionOverload = unknown,
+	TSignatures extends AnySignature[],
+	TFunctionOverload = unknown,
 > = TSignatures extends [
-  infer TSignature extends AnySignature,
-  ...infer TSignaturesRest extends AnySignature[],
+	infer TSignature extends AnySignature,
+	...infer TSignaturesRest extends AnySignature[],
 ]
-  ? InferFunctionOverload<TSignaturesRest, TFunctionOverload & TSignature>
-  : TFunctionOverload;
+	? InferFunctionOverload<TSignaturesRest, TFunctionOverload & TSignature>
+	: TFunctionOverload;
 
 /**
  * InferImplementationArgument
@@ -139,17 +144,16 @@ export type InferFunctionOverload<
  * @description Infers the type of the argument given to the implementation function.
  */
 export type InferImplementationTuple<
-  TSignatures extends AnySignature[],
-  TArgs = InferAcceptedArgs<TSignatures>,
-> =
-  TArgs extends InferAcceptedArgs<TSignatures>
-    ? [
-        (
-          i: InferExpectedReturnType<TSignatures, TArgs>
-        ) => Checked<InferExpectedReturnType<TSignatures, TArgs>>,
-        ...TArgs,
-      ]
-    : never;
+	TSignatures extends AnySignature[],
+	TArgs = InferAcceptedArgs<TSignatures>,
+> = TArgs extends InferAcceptedArgs<TSignatures>
+	? [
+			(
+				i: InferExpectedReturnType<TSignatures, TArgs>,
+			) => Checked<InferExpectedReturnType<TSignatures, TArgs>>,
+			...TArgs,
+		]
+	: never;
 
 /**
  * InferImplementation
@@ -157,5 +161,5 @@ export type InferImplementationTuple<
  * @description Infers the type of the implementation function.
  */
 export type InferImplementation<TSignatures extends AnySignature[]> = (
-  tuple: InferImplementationTuple<TSignatures>
+	tuple: InferImplementationTuple<TSignatures>,
 ) => Checked<InferAcceptedReturnTypes<TSignatures>>;
