@@ -22,6 +22,7 @@ jobs:
           version: 8
       - run: pnpm install
       - run: pnpm test
+      - run: pnpm check
       - run: pnpm build
       - run: npm publish
         env:

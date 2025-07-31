@@ -1,47 +1,48 @@
+// biome-ignore-all lint/suspicious/noExplicitAny: use any for simpler tests
 /**
  * This file is not a regular test file.
  * In order for those tests to be validated,
  * the file needs to compile without error.
  */
-import { expectType, TypeEqual, TypeOf } from 'ts-expect';
-import {
-  InferAcceptedArgs,
-  InferAcceptedReturnTypes,
-  InferConditionalReturnFunction,
-  InferDeclarationConstraint,
-  InferExpectedReturnType,
-  InferFunctionOverload,
-  InferImplementation,
-  InferImplementationTuple,
-  InferLiteralDeclarationConstraint,
-} from '../src/types';
-import { Checked } from '../src/classes';
+import { expectType, type TypeEqual, type TypeOf } from "ts-expect";
+import type { Checked } from "../src/classes";
+import type {
+	InferAcceptedArgs,
+	InferAcceptedReturnTypes,
+	InferConditionalReturnFunction,
+	InferDeclarationConstraint,
+	InferExpectedReturnType,
+	InferFunctionOverload,
+	InferImplementation,
+	InferImplementationTuple,
+	InferLiteralDeclarationConstraint,
+} from "../src/types";
 
 /**
  * InferAcceptedInputs
  */
 
 expectType<
-  TypeEqual<
-    InferAcceptedArgs<[(a: 'number') => number, (a: 'string') => string]>,
-    ['number'] | ['string']
-  >
+	TypeEqual<
+		InferAcceptedArgs<[(a: "number") => number, (a: "string") => string]>,
+		["number"] | ["string"]
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferAcceptedArgs<
-      [(a1: 'number', a2: number) => number, (a: 'string') => string]
-    >,
-    ['number', number] | ['string']
-  >
+	TypeEqual<
+		InferAcceptedArgs<
+			[(a1: "number", a2: number) => number, (a: "string") => string]
+		>,
+		["number", number] | ["string"]
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferAcceptedArgs<[(a: 'number') => number, (a: 'string') => string]>,
-    ['number'] | ['symbol']
-  >
+	TypeEqual<
+		InferAcceptedArgs<[(a: "number") => number, (a: "string") => string]>,
+		["number"] | ["symbol"]
+	>
 >(false);
 
 /**
@@ -49,21 +50,21 @@ expectType<
  */
 
 expectType<
-  TypeEqual<
-    InferAcceptedReturnTypes<
-      [(a: 'number') => number, (a: 'string') => string]
-    >,
-    number | string
-  >
+	TypeEqual<
+		InferAcceptedReturnTypes<
+			[(a: "number") => number, (a: "string") => string]
+		>,
+		number | string
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferAcceptedReturnTypes<
-      [(a: 'number') => number, (a: 'string') => string]
-    >,
-    number | symbol
-  >
+	TypeEqual<
+		InferAcceptedReturnTypes<
+			[(a: "number") => number, (a: "string") => string]
+		>,
+		number | symbol
+	>
 >(false);
 
 /**
@@ -71,82 +72,82 @@ expectType<
  */
 
 expectType<
-  TypeEqual<
-    InferExpectedReturnType<
-      [(a: 'number') => number, (a: 'string') => string],
-      ['number']
-    >,
-    number
-  >
+	TypeEqual<
+		InferExpectedReturnType<
+			[(a: "number") => number, (a: "string") => string],
+			["number"]
+		>,
+		number
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferExpectedReturnType<
-      [(a: 'number') => number, (a: 'string') => string],
-      ['string']
-    >,
-    string
-  >
+	TypeEqual<
+		InferExpectedReturnType<
+			[(a: "number") => number, (a: "string") => string],
+			["string"]
+		>,
+		string
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferExpectedReturnType<
-      [
-        (a: { test: 'test'; test2: 'test2' }) => string,
-        (a: { test: 'test' }) => number,
-      ],
-      [{ test: 'test' }]
-    >,
-    number
-  >
+	TypeEqual<
+		InferExpectedReturnType<
+			[
+				(a: { test: "test"; test2: "test2" }) => string,
+				(a: { test: "test" }) => number,
+			],
+			[{ test: "test" }]
+		>,
+		number
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferExpectedReturnType<
-      [
-        (a: { test: 'test'; test2: 'test2' }) => string,
-        (a: { test: 'test' }) => number,
-      ],
-      [{ test: 'test'; test2: 'test2' }]
-    >,
-    string
-  >
+	TypeEqual<
+		InferExpectedReturnType<
+			[
+				(a: { test: "test"; test2: "test2" }) => string,
+				(a: { test: "test" }) => number,
+			],
+			[{ test: "test"; test2: "test2" }]
+		>,
+		string
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferExpectedReturnType<
-      [
-        (a: { type: 'string'; value: number }) => string,
-        (a: { type: 'number'; value: number }) => number,
-      ],
-      [{ type: 'string'; value: number }]
-    >,
-    string
-  >
+	TypeEqual<
+		InferExpectedReturnType<
+			[
+				(a: { type: "string"; value: number }) => string,
+				(a: { type: "number"; value: number }) => number,
+			],
+			[{ type: "string"; value: number }]
+		>,
+		string
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferExpectedReturnType<
-      [(a: string) => string, (a: number) => number],
-      [string]
-    >,
-    string
-  >
+	TypeEqual<
+		InferExpectedReturnType<
+			[(a: string) => string, (a: number) => number],
+			[string]
+		>,
+		string
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferExpectedReturnType<
-      [(a: string) => string, (a: number) => number],
-      [number]
-    >,
-    number
-  >
+	TypeEqual<
+		InferExpectedReturnType<
+			[(a: string) => string, (a: number) => number],
+			[number]
+		>,
+		number
+	>
 >(true);
 
 /**
@@ -154,98 +155,98 @@ expectType<
  */
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<
-      [(a: 'number') => any, (a: 'string') => string],
-      (a: 'number') => number
-    >,
-    never
-  >
+	TypeEqual<
+		InferDeclarationConstraint<
+			[(a: "number") => any, (a: "string") => string],
+			(a: "number") => number
+		>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<
-      [(a: 'number') => any, (a: 'string') => any],
-      (a: 'nmb') => number
-    >,
-    unknown
-  >
+	TypeEqual<
+		InferDeclarationConstraint<
+			[(a: "number") => any, (a: "string") => any],
+			(a: "nmb") => number
+		>,
+		unknown
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<
-      [(a: { test: 'test'; test2: 'test2' }) => any],
-      (a: { test: 'test' }) => any
-    >,
-    unknown
-  >
+	TypeEqual<
+		InferDeclarationConstraint<
+			[(a: { test: "test"; test2: "test2" }) => any],
+			(a: { test: "test" }) => any
+		>,
+		unknown
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<
-      [(a: { test: 'test' }) => any],
-      (a: { test: 'test'; test2: 'test2' }) => any
-    >,
-    never
-  >
+	TypeEqual<
+		InferDeclarationConstraint<
+			[(a: { test: "test" }) => any],
+			(a: { test: "test"; test2: "test2" }) => any
+		>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<
-      [(a: string) => any],
-      (a: `https://${string}`) => URL
-    >,
-    never
-  >
+	TypeEqual<
+		InferDeclarationConstraint<
+			[(a: string) => any],
+			(a: `https://${string}`) => URL
+		>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<
-      [(a: `https://${string}`) => any],
-      (a: string) => string
-    >,
-    never
-  >
+	TypeEqual<
+		InferDeclarationConstraint<
+			[(a: `https://${string}`) => any],
+			(a: string) => string
+		>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<[(a: boolean) => any], (a: true) => any>,
-    never
-  >
+	TypeEqual<
+		InferDeclarationConstraint<[(a: boolean) => any], (a: true) => any>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<[(a: boolean) => any], (a: false) => any>,
-    never
-  >
+	TypeEqual<
+		InferDeclarationConstraint<[(a: boolean) => any], (a: false) => any>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<[(a: true) => any], (a: boolean) => any>,
-    never
-  >
+	TypeEqual<
+		InferDeclarationConstraint<[(a: true) => any], (a: boolean) => any>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<[(a: false) => any], (a: boolean) => any>,
-    never
-  >
+	TypeEqual<
+		InferDeclarationConstraint<[(a: false) => any], (a: boolean) => any>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferDeclarationConstraint<[(a: false) => any], (a: true) => any>,
-    unknown
-  >
+	TypeEqual<
+		InferDeclarationConstraint<[(a: false) => any], (a: true) => any>,
+		unknown
+	>
 >(true);
 
 /**
@@ -253,51 +254,51 @@ expectType<
  */
 
 expectType<
-  TypeEqual<
-    InferLiteralDeclarationConstraint<[(a: false) => any], [boolean]>,
-    never
-  >
+	TypeEqual<
+		InferLiteralDeclarationConstraint<[(a: false) => any], [boolean]>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferLiteralDeclarationConstraint<[(a: 'string') => any], [string]>,
-    never
-  >
+	TypeEqual<
+		InferLiteralDeclarationConstraint<[(a: "string") => any], [string]>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<InferLiteralDeclarationConstraint<[(a: 1) => any], [number]>, never>
+	TypeEqual<InferLiteralDeclarationConstraint<[(a: 1) => any], [number]>, never>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferLiteralDeclarationConstraint<
-      [(a0: 1, a1: 'one') => any],
-      [number, string]
-    >,
-    never
-  >
+	TypeEqual<
+		InferLiteralDeclarationConstraint<
+			[(a0: 1, a1: "one") => any],
+			[number, string]
+		>,
+		never
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferLiteralDeclarationConstraint<
-      [(a0: 1, a1: 'one') => any],
-      [string, number]
-    >,
-    never
-  >
+	TypeEqual<
+		InferLiteralDeclarationConstraint<
+			[(a0: 1, a1: "one") => any],
+			[string, number]
+		>,
+		never
+	>
 >(false);
 
 expectType<
-  TypeEqual<
-    InferLiteralDeclarationConstraint<
-      [(a0: 1, a1: 'one') => any],
-      [number, string, boolean]
-    >,
-    never
-  >
+	TypeEqual<
+		InferLiteralDeclarationConstraint<
+			[(a0: 1, a1: "one") => any],
+			[number, string, boolean]
+		>,
+		never
+	>
 >(false);
 
 /**
@@ -305,23 +306,23 @@ expectType<
  */
 
 expectType<
-  TypeOf<
-    (a: 'number' | 'string') => number | string,
-    InferConditionalReturnFunction<
-      [(a: 'number') => number, (a: 'string') => string]
-    >
-  >
+	TypeOf<
+		(a: "number" | "string") => number | string,
+		InferConditionalReturnFunction<
+			[(a: "number") => number, (a: "string") => string]
+		>
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    ReturnType<
-      InferConditionalReturnFunction<
-        [(a: 'number') => number, (a: 'string') => string]
-      >
-    >,
-    number | string
-  >
+	TypeEqual<
+		ReturnType<
+			InferConditionalReturnFunction<
+				[(a: "number") => number, (a: "string") => string]
+			>
+		>,
+		number | string
+	>
 >(true);
 
 /**
@@ -329,10 +330,10 @@ expectType<
  */
 
 expectType<
-  TypeEqual<
-    InferFunctionOverload<[(a: 'number') => number, (a: 'string') => string]>,
-    ((a: 'number') => number) & ((a: 'string') => string)
-  >
+	TypeEqual<
+		InferFunctionOverload<[(a: "number") => number, (a: "string") => string]>,
+		((a: "number") => number) & ((a: "string") => string)
+	>
 >(true);
 
 /**
@@ -340,54 +341,54 @@ expectType<
  */
 
 expectType<
-  TypeEqual<
-    InferImplementationTuple<
-      [(a: 'number') => number, (a: 'string') => string]
-    >,
-    | [(i: number) => Checked<number>, 'number']
-    | [(i: string) => Checked<string>, 'string']
-  >
+	TypeEqual<
+		InferImplementationTuple<
+			[(a: "number") => number, (a: "string") => string]
+		>,
+		| [(i: number) => Checked<number>, "number"]
+		| [(i: string) => Checked<string>, "string"]
+	>
 >(true);
 
 expectType<
-  TypeEqual<
-    InferImplementationTuple<
-      [
-        (a: { id: number; name: string }) => 'profile',
-        (a: { id: number }) => 'item',
-      ]
-    >,
-    | [
-        (i: 'profile') => Checked<'profile'>,
-        {
-          id: number;
-          name: string;
-        },
-      ]
-    | [
-        (i: 'item') => Checked<'item'>,
-        {
-          id: number;
-        },
-      ]
-  >
+	TypeEqual<
+		InferImplementationTuple<
+			[
+				(a: { id: number; name: string }) => "profile",
+				(a: { id: number }) => "item",
+			]
+		>,
+		| [
+				(i: "profile") => Checked<"profile">,
+				{
+					id: number;
+					name: string;
+				},
+		  ]
+		| [
+				(i: "item") => Checked<"item">,
+				{
+					id: number;
+				},
+		  ]
+	>
 >(true);
 
 /**
  * InferImplementation
  */
 expectType<
-  TypeEqual<
-    InferImplementation<
-      [
-        (a: { id: number; name: string }) => 'profile',
-        (a: { id: number }) => 'item',
-      ]
-    >,
-    (
-      a:
-        | [(i: 'profile') => Checked<'profile'>, { id: number; name: string }]
-        | [(i: 'item') => Checked<'item'>, { id: number }]
-    ) => Checked<'profile' | 'item'>
-  >
+	TypeEqual<
+		InferImplementation<
+			[
+				(a: { id: number; name: string }) => "profile",
+				(a: { id: number }) => "item",
+			]
+		>,
+		(
+			a:
+				| [(i: "profile") => Checked<"profile">, { id: number; name: string }]
+				| [(i: "item") => Checked<"item">, { id: number }],
+		) => Checked<"profile" | "item">
+	>
 >(true);

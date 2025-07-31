@@ -23,6 +23,7 @@ jobs:
           version: 8
       - run: pnpm install
       - run: pnpm test
+      - run: pnpm check
       - uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
