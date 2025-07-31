@@ -1,6 +1,6 @@
 {
   "name": "fffunction",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Create polymorphic functions in typescript.",
   "packageManager": "pnpm@9.15.0",
   "main": "dist/index.js",
