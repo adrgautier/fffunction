@@ -1,4 +1,5 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: use any for simpler tests
+import { describe, expect, it, test } from "vitest";
 import { Checked } from "../src/classes";
 import { tupleFactory } from "../src/tupleFactory";
 

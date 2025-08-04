@@ -1,4 +1,5 @@
 import { match, P } from "ts-pattern";
+import { describe, expect, it } from "vitest";
 import { fffunction } from "../src/index";
 
 describe("fffunction", () => {
