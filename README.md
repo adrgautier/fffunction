@@ -1,5 +1,5 @@
 # ![fffunction](./fffunction.svg)
- ![typescript](https://img.shields.io/badge/written%20for-typescript-3178c6?style=flat-square) ![biome](https://img.shields.io/badge/checked%20with-biome-60a5fa?style=flat-square) [![codecov](https://img.shields.io/codecov/c/github/adrgautier/fffunction?style=flat-square&token=IPTGBDRRJE)](https://codecov.io/gh/adrgautier/fffunction) [![npm](https://img.shields.io/npm/v/fffunction?style=flat-square)](https://www.npmjs.com/package/fffunction)
+ ![typescript](https://img.shields.io/badge/written%20for-typescript-3178c6?style=flat-square) ![biome](https://img.shields.io/badge/checked%20with-biome-60a5fa?style=flat-square) ![vitest](https://img.shields.io/badge/tested%20with-vitest-729b1b?style=flat-square) [![codecov](https://img.shields.io/codecov/c/github/adrgautier/fffunction?style=flat-square&token=IPTGBDRRJE)](https://codecov.io/gh/adrgautier/fffunction) [![npm](https://img.shields.io/npm/v/fffunction?style=flat-square)](https://www.npmjs.com/package/fffunction)
 
 **fffunction** is a tool which simplifies **polymorphic** functions declaration and adds **type constraints** to the implemention function.
 

@@ -1,67 +1,71 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: use any for simpler tests
-/**
- * This file is not a regular test file.
- * In order for those tests to be validated,
- * the file needs to compile without error.
- */
-import { expectType, type TypeEqual } from "ts-expect";
+import { describe, expectTypeOf, test } from "vitest";
 import { fffunction } from "../src";
 
-/**
- * fffunction
- */
+describe("fffunction - Type Tests", () => {
+	test("should handle basic function composition", () => {
+		const result = fffunction
+			.f<(a: string) => { test2: "test2" }>()
+			.f<(b: number) => { test: "test" }>()
+			.f(function implementation([check]) {
+				return check({ test: "test", test2: "test2" });
+			});
 
-fffunction
-	.f<(a: string) => { test2: "test2" }>()
-	.f<(b: number) => { test: "test" }>()
-	.f(function implementation([check]) {
-		return check({ test: "test", test2: "test2" });
+		expectTypeOf(result).toBeFunction();
 	});
 
-fffunction
-	.f<(a: string) => string>()
-	// @ts-expect-error
-	.f<(b: string) => number>();
+	test("should reject incompatible function signatures", () => {
+		fffunction
+			.f<(a: string) => string>()
+			// @ts-expect-error
+			.f<(b: string) => number>();
 
-fffunction
-	.f<(a: `https://${string}`) => URL>()
-	// @ts-expect-error
-	.f<(b: string) => string>();
-
-fffunction
-	.f<(a: "string") => string>()
-	.f<(a: "void") => void>()
-	.f(([check, arg]) => {
-		if (arg === "string") {
-			return check("test");
-		}
-		return check();
+		fffunction
+			.f<(a: `https://${string}`) => URL>()
+			// @ts-expect-error
+			.f<(b: string) => string>();
 	});
 
-const overload = fffunction
-	.f<(a: "string") => string>()
-	.f<(b: "number") => number>()
-	.f<"overload">((() => {}) as any);
+	test("should handle void returns correctly", () => {
+		const result = fffunction
+			.f<(a: "string") => string>()
+			.f<(a: "void") => void>()
+			.f(([check, arg]) => {
+				if (arg === "string") {
+					return check("test");
+				}
+				return check();
+			});
 
-expectType<((i: "string") => string) & ((i: "number") => number)>(overload);
+		expectTypeOf(result).toBeFunction();
+	});
 
-expectType<
-	TypeEqual<
-		typeof overload,
-		((i: "string") => string) & ((i: "number") => number)
-	>
->(true);
+	test("should create proper function overload", () => {
+		const overload = fffunction
+			.f<(a: "string") => string>()
+			.f<(b: "number") => number>()
+			.f<"overload">((() => {}) as any);
 
-const conditional = fffunction
-	.f<(a: "string") => string>()
-	.f<(b: "number") => number>()
-	.f((() => {}) as any);
+		expectTypeOf(overload).toExtend<
+			((i: "string") => string) & ((i: "number") => number)
+		>();
+		expectTypeOf(overload).toEqualTypeOf<
+			((i: "string") => string) & ((i: "number") => number)
+		>();
+	});
 
-expectType<((i: "string") => string) & ((i: "number") => number)>(conditional);
+	test("should differentiate conditional return vs function overload", () => {
+		const conditional = fffunction
+			.f<(a: "string") => string>()
+			.f<(b: "number") => number>()
+			.f((() => {}) as any);
 
-expectType<
-	TypeEqual<
-		typeof conditional,
-		((i: "string") => string) & ((i: "number") => number)
-	>
->(false);
+		// The conditional return type extends the function overload but is not exactly equal to it
+		expectTypeOf(conditional).toExtend<
+			((i: "string") => string) & ((i: "number") => number)
+		>();
+		expectTypeOf(conditional).not.toEqualTypeOf<
+			((i: "string") => string) & ((i: "number") => number)
+		>();
+	});
+});

@@ -16,9 +16,6 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-            "complexity": {
-                "noUselessLoneBlockStatements": "off"
-            },
             "correctness": {
                 "noUnusedPrivateClassMembers": "off"
             }

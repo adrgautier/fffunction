@@ -1,10 +1,5 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: use any for simpler tests
-/**
- * This file is not a regular test file.
- * In order for those tests to be validated,
- * the file needs to compile without error.
- */
-import { expectType, type TypeEqual, type TypeOf } from "ts-expect";
+import { describe, expectTypeOf, test } from "vitest";
 import type { Checked } from "../src/classes";
 import type {
 	InferAcceptedArgs,
@@ -18,377 +13,283 @@ import type {
 	InferLiteralDeclarationConstraint,
 } from "../src/types";
 
-/**
- * InferAcceptedInputs
- */
+describe("Types - InferAcceptedArgs", () => {
+	test("should infer accepted arguments correctly", () => {
+		expectTypeOf<
+			InferAcceptedArgs<[(a: "number") => number, (a: "string") => string]>
+		>().toEqualTypeOf<["number"] | ["string"]>();
 
-expectType<
-	TypeEqual<
-		InferAcceptedArgs<[(a: "number") => number, (a: "string") => string]>,
-		["number"] | ["string"]
-	>
->(true);
+		expectTypeOf<
+			InferAcceptedArgs<
+				[(a1: "number", a2: number) => number, (a: "string") => string]
+			>
+		>().toEqualTypeOf<["number", number] | ["string"]>();
 
-expectType<
-	TypeEqual<
-		InferAcceptedArgs<
-			[(a1: "number", a2: number) => number, (a: "string") => string]
-		>,
-		["number", number] | ["string"]
-	>
->(true);
+		expectTypeOf<
+			InferAcceptedArgs<[(a: "number") => number, (a: "string") => string]>
+		>().not.toEqualTypeOf<["number"] | ["symbol"]>();
+	});
+});
 
-expectType<
-	TypeEqual<
-		InferAcceptedArgs<[(a: "number") => number, (a: "string") => string]>,
-		["number"] | ["symbol"]
-	>
->(false);
+describe("Types - InferAcceptedReturnTypes", () => {
+	test("should infer accepted return types correctly", () => {
+		expectTypeOf<
+			InferAcceptedReturnTypes<
+				[(a: "number") => number, (a: "string") => string]
+			>
+		>().toEqualTypeOf<number | string>();
 
-/**
- * InferAcceptedReturnTypes
- */
+		expectTypeOf<
+			InferAcceptedReturnTypes<
+				[(a: "number") => number, (a: "string") => string]
+			>
+		>().not.toEqualTypeOf<number | symbol>();
+	});
+});
 
-expectType<
-	TypeEqual<
-		InferAcceptedReturnTypes<
-			[(a: "number") => number, (a: "string") => string]
-		>,
-		number | string
-	>
->(true);
+describe("Types - InferExpectedReturnType", () => {
+	test("should infer expected return types for simple cases", () => {
+		expectTypeOf<
+			InferExpectedReturnType<
+				[(a: "number") => number, (a: "string") => string],
+				["number"]
+			>
+		>().toEqualTypeOf<number>();
 
-expectType<
-	TypeEqual<
-		InferAcceptedReturnTypes<
-			[(a: "number") => number, (a: "string") => string]
-		>,
-		number | symbol
-	>
->(false);
+		expectTypeOf<
+			InferExpectedReturnType<
+				[(a: "number") => number, (a: "string") => string],
+				["string"]
+			>
+		>().toEqualTypeOf<string>();
+	});
 
-/**
- * InferExpectedReturnType
- */
+	test("should handle object-based matching", () => {
+		expectTypeOf<
+			InferExpectedReturnType<
+				[
+					(a: { test: "test"; test2: "test2" }) => string,
+					(a: { test: "test" }) => number,
+				],
+				[{ test: "test" }]
+			>
+		>().toEqualTypeOf<number>();
 
-expectType<
-	TypeEqual<
-		InferExpectedReturnType<
-			[(a: "number") => number, (a: "string") => string],
-			["number"]
-		>,
-		number
-	>
->(true);
+		expectTypeOf<
+			InferExpectedReturnType<
+				[
+					(a: { test: "test"; test2: "test2" }) => string,
+					(a: { test: "test" }) => number,
+				],
+				[{ test: "test"; test2: "test2" }]
+			>
+		>().toEqualTypeOf<string>();
 
-expectType<
-	TypeEqual<
-		InferExpectedReturnType<
-			[(a: "number") => number, (a: "string") => string],
-			["string"]
-		>,
-		string
-	>
->(true);
+		expectTypeOf<
+			InferExpectedReturnType<
+				[
+					(a: { type: "string"; value: number }) => string,
+					(a: { type: "number"; value: number }) => number,
+				],
+				[{ type: "string"; value: number }]
+			>
+		>().toEqualTypeOf<string>();
+	});
 
-expectType<
-	TypeEqual<
-		InferExpectedReturnType<
-			[
-				(a: { test: "test"; test2: "test2" }) => string,
-				(a: { test: "test" }) => number,
-			],
-			[{ test: "test" }]
-		>,
-		number
-	>
->(true);
+	test("should handle primitive type matching", () => {
+		expectTypeOf<
+			InferExpectedReturnType<
+				[(a: string) => string, (a: number) => number],
+				[string]
+			>
+		>().toEqualTypeOf<string>();
 
-expectType<
-	TypeEqual<
-		InferExpectedReturnType<
-			[
-				(a: { test: "test"; test2: "test2" }) => string,
-				(a: { test: "test" }) => number,
-			],
-			[{ test: "test"; test2: "test2" }]
-		>,
-		string
-	>
->(true);
+		expectTypeOf<
+			InferExpectedReturnType<
+				[(a: string) => string, (a: number) => number],
+				[number]
+			>
+		>().toEqualTypeOf<number>();
+	});
+});
 
-expectType<
-	TypeEqual<
-		InferExpectedReturnType<
-			[
-				(a: { type: "string"; value: number }) => string,
-				(a: { type: "number"; value: number }) => number,
-			],
-			[{ type: "string"; value: number }]
-		>,
-		string
-	>
->(true);
+describe("Types - InferDeclarationConstraint", () => {
+	test("should handle string literal constraints", () => {
+		expectTypeOf<
+			InferDeclarationConstraint<
+				[(a: "number") => any, (a: "string") => string],
+				(a: "number") => number
+			>
+		>().toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferExpectedReturnType<
-			[(a: string) => string, (a: number) => number],
-			[string]
-		>,
-		string
-	>
->(true);
+		expectTypeOf<
+			InferDeclarationConstraint<
+				[(a: "number") => any, (a: "string") => any],
+				(a: "nmb") => number
+			>
+		>().toEqualTypeOf<unknown>();
+	});
 
-expectType<
-	TypeEqual<
-		InferExpectedReturnType<
-			[(a: string) => string, (a: number) => number],
-			[number]
-		>,
-		number
-	>
->(true);
+	test("should handle object type constraints", () => {
+		expectTypeOf<
+			InferDeclarationConstraint<
+				[(a: { test: "test"; test2: "test2" }) => any],
+				(a: { test: "test" }) => any
+			>
+		>().toEqualTypeOf<unknown>();
 
-/**
- * InferDeclarationConstraint
- */
+		expectTypeOf<
+			InferDeclarationConstraint<
+				[(a: { test: "test" }) => any],
+				(a: { test: "test"; test2: "test2" }) => any
+			>
+		>().toEqualTypeOf<never>();
+	});
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<
-			[(a: "number") => any, (a: "string") => string],
-			(a: "number") => number
-		>,
-		never
-	>
->(true);
+	test("should handle template literal constraints", () => {
+		expectTypeOf<
+			InferDeclarationConstraint<
+				[(a: string) => any],
+				(a: `https://${string}`) => URL
+			>
+		>().toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<
-			[(a: "number") => any, (a: "string") => any],
-			(a: "nmb") => number
-		>,
-		unknown
-	>
->(true);
+		expectTypeOf<
+			InferDeclarationConstraint<
+				[(a: `https://${string}`) => any],
+				(a: string) => string
+			>
+		>().toEqualTypeOf<never>();
+	});
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<
-			[(a: { test: "test"; test2: "test2" }) => any],
-			(a: { test: "test" }) => any
-		>,
-		unknown
-	>
->(true);
+	test("should handle boolean type constraints", () => {
+		expectTypeOf<
+			InferDeclarationConstraint<[(a: boolean) => any], (a: true) => any>
+		>().toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<
-			[(a: { test: "test" }) => any],
-			(a: { test: "test"; test2: "test2" }) => any
-		>,
-		never
-	>
->(true);
+		expectTypeOf<
+			InferDeclarationConstraint<[(a: boolean) => any], (a: false) => any>
+		>().toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<
-			[(a: string) => any],
-			(a: `https://${string}`) => URL
-		>,
-		never
-	>
->(true);
+		expectTypeOf<
+			InferDeclarationConstraint<[(a: true) => any], (a: boolean) => any>
+		>().toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<
-			[(a: `https://${string}`) => any],
-			(a: string) => string
-		>,
-		never
-	>
->(true);
+		expectTypeOf<
+			InferDeclarationConstraint<[(a: false) => any], (a: boolean) => any>
+		>().toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<[(a: boolean) => any], (a: true) => any>,
-		never
-	>
->(true);
+		expectTypeOf<
+			InferDeclarationConstraint<[(a: false) => any], (a: true) => any>
+		>().toEqualTypeOf<unknown>();
+	});
+});
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<[(a: boolean) => any], (a: false) => any>,
-		never
-	>
->(true);
+describe("Types - InferLiteralDeclarationConstraint", () => {
+	test("should handle single literal constraints", () => {
+		expectTypeOf<
+			InferLiteralDeclarationConstraint<[(a: false) => any], [boolean]>
+		>().toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<[(a: true) => any], (a: boolean) => any>,
-		never
-	>
->(true);
+		expectTypeOf<
+			InferLiteralDeclarationConstraint<[(a: "string") => any], [string]>
+		>().toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<[(a: false) => any], (a: boolean) => any>,
-		never
-	>
->(true);
+		expectTypeOf<
+			InferLiteralDeclarationConstraint<[(a: 1) => any], [number]>
+		>().toEqualTypeOf<never>();
+	});
 
-expectType<
-	TypeEqual<
-		InferDeclarationConstraint<[(a: false) => any], (a: true) => any>,
-		unknown
-	>
->(true);
+	test("should handle multiple parameter constraints", () => {
+		expectTypeOf<
+			InferLiteralDeclarationConstraint<
+				[(a0: 1, a1: "one") => any],
+				[number, string]
+			>
+		>().toEqualTypeOf<never>();
 
-/**
- * InferLiteralDeclarationConstraint
- */
+		expectTypeOf<
+			InferLiteralDeclarationConstraint<
+				[(a0: 1, a1: "one") => any],
+				[string, number]
+			>
+		>().not.toEqualTypeOf<never>();
 
-expectType<
-	TypeEqual<
-		InferLiteralDeclarationConstraint<[(a: false) => any], [boolean]>,
-		never
-	>
->(true);
+		expectTypeOf<
+			InferLiteralDeclarationConstraint<
+				[(a0: 1, a1: "one") => any],
+				[number, string, boolean]
+			>
+		>().not.toEqualTypeOf<never>();
+	});
+});
 
-expectType<
-	TypeEqual<
-		InferLiteralDeclarationConstraint<[(a: "string") => any], [string]>,
-		never
-	>
->(true);
-
-expectType<
-	TypeEqual<InferLiteralDeclarationConstraint<[(a: 1) => any], [number]>, never>
->(true);
-
-expectType<
-	TypeEqual<
-		InferLiteralDeclarationConstraint<
-			[(a0: 1, a1: "one") => any],
-			[number, string]
-		>,
-		never
-	>
->(true);
-
-expectType<
-	TypeEqual<
-		InferLiteralDeclarationConstraint<
-			[(a0: 1, a1: "one") => any],
-			[string, number]
-		>,
-		never
-	>
->(false);
-
-expectType<
-	TypeEqual<
-		InferLiteralDeclarationConstraint<
-			[(a0: 1, a1: "one") => any],
-			[number, string, boolean]
-		>,
-		never
-	>
->(false);
-
-/**
- * InferConditionalReturnFunction
- */
-
-expectType<
-	TypeOf<
-		(a: "number" | "string") => number | string,
-		InferConditionalReturnFunction<
-			[(a: "number") => number, (a: "string") => string]
-		>
-	>
->(true);
-
-expectType<
-	TypeEqual<
-		ReturnType<
+describe("Types - InferConditionalReturnFunction", () => {
+	test("should infer conditional return function correctly", () => {
+		expectTypeOf<
 			InferConditionalReturnFunction<
 				[(a: "number") => number, (a: "string") => string]
 			>
-		>,
-		number | string
-	>
->(true);
+		>().toExtend<(a: "number" | "string") => number | string>();
 
-/**
- * InferFunctionOverload
- */
+		expectTypeOf<
+			InferConditionalReturnFunction<
+				[(a: "number") => number, (a: "string") => string]
+			>
+		>().returns.toEqualTypeOf<number | string>();
+	});
+});
 
-expectType<
-	TypeEqual<
-		InferFunctionOverload<[(a: "number") => number, (a: "string") => string]>,
-		((a: "number") => number) & ((a: "string") => string)
-	>
->(true);
+describe("Types - InferFunctionOverload", () => {
+	test("should infer function overload correctly", () => {
+		expectTypeOf<
+			InferFunctionOverload<[(a: "number") => number, (a: "string") => string]>
+		>().toEqualTypeOf<((a: "number") => number) & ((a: "string") => string)>();
+	});
+});
 
-/**
- * InferImplementationTuple
- */
+describe("Types - InferImplementationTuple", () => {
+	test("should infer implementation tuple for simple types", () => {
+		expectTypeOf<
+			InferImplementationTuple<
+				[(a: "number") => number, (a: "string") => string]
+			>
+		>().toEqualTypeOf<
+			| [(i: number) => Checked<number>, "number"]
+			| [(i: string) => Checked<string>, "string"]
+		>();
+	});
 
-expectType<
-	TypeEqual<
-		InferImplementationTuple<
-			[(a: "number") => number, (a: "string") => string]
-		>,
-		| [(i: number) => Checked<number>, "number"]
-		| [(i: string) => Checked<string>, "string"]
-	>
->(true);
+	test("should infer implementation tuple for object types", () => {
+		expectTypeOf<
+			InferImplementationTuple<
+				[
+					(a: { id: number; name: string }) => "profile",
+					(a: { id: number }) => "item",
+				]
+			>
+		>().toEqualTypeOf<
+			| [(i: "profile") => Checked<"profile">, { id: number; name: string }]
+			| [(i: "item") => Checked<"item">, { id: number }]
+		>();
+	});
+});
 
-expectType<
-	TypeEqual<
-		InferImplementationTuple<
-			[
-				(a: { id: number; name: string }) => "profile",
-				(a: { id: number }) => "item",
-			]
-		>,
-		| [
-				(i: "profile") => Checked<"profile">,
-				{
-					id: number;
-					name: string;
-				},
-		  ]
-		| [
-				(i: "item") => Checked<"item">,
-				{
-					id: number;
-				},
-		  ]
-	>
->(true);
-
-/**
- * InferImplementation
- */
-expectType<
-	TypeEqual<
-		InferImplementation<
-			[
-				(a: { id: number; name: string }) => "profile",
-				(a: { id: number }) => "item",
-			]
-		>,
-		(
-			a:
-				| [(i: "profile") => Checked<"profile">, { id: number; name: string }]
-				| [(i: "item") => Checked<"item">, { id: number }],
-		) => Checked<"profile" | "item">
-	>
->(true);
+describe("Types - InferImplementation", () => {
+	test("should infer implementation function correctly", () => {
+		expectTypeOf<
+			InferImplementation<
+				[
+					(a: { id: number; name: string }) => "profile",
+					(a: { id: number }) => "item",
+				]
+			>
+		>().toEqualTypeOf<
+			(
+				a:
+					| [(i: "profile") => Checked<"profile">, { id: number; name: string }]
+					| [(i: "item") => Checked<"item">, { id: number }],
+			) => Checked<"profile" | "item">
+		>();
+	});
+});
