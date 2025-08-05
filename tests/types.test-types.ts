@@ -213,14 +213,14 @@ describe("Types - InferLiteralDeclarationConstraint", () => {
 				[(a0: 1, a1: "one") => any],
 				[string, number]
 			>
-		>().not.toEqualTypeOf<never>();
+		>().toEqualTypeOf<unknown>();
 
 		expectTypeOf<
 			InferLiteralDeclarationConstraint<
 				[(a0: 1, a1: "one") => any],
 				[number, string, boolean]
 			>
-		>().not.toEqualTypeOf<never>();
+		>().toEqualTypeOf<unknown>();
 	});
 });
 
